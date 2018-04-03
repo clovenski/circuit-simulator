@@ -1,7 +1,7 @@
 # circuit-simulator
 A program that can help design simple circuits.
 
-Initial ideas:
+Initial ideas/Notes:
 
 + goal is to allow the user to design a circuit with inputs, outputs, gates and flip-flops and check the state of the entire circuit
 with each clock cycle
@@ -14,3 +14,6 @@ with each clock cycle
 + saving and loading to a file
 + expect the user interface to be full of options
 + classes: DFlipFlop, Gate, Input, Output, Clock, CircuitSimulator, etc.
++ entire program can be represented with a directed, unweighted graph represented with adjacency lists
++ for updating the graph, breadth first traversal; update all input node values, then start updating in BFT fashion
++ only DFlipFlop needs to be separate object that has references to the appropriate nodes in graph for data output?
