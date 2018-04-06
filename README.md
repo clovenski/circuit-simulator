@@ -15,5 +15,6 @@ with each clock cycle
 + expect the user interface to be full of options
 + classes: DFlipFlop, Gate, Input, Output, Clock, CircuitSimulator, etc.
 + entire program can be represented with a directed, unweighted graph represented with adjacency lists
-+ for updating the graph, breadth first traversal; update all input node values, then start updating in BFT fashion
++ for updating the graph, topological ordering? with DFlipFlop next state nodes updated from present state node
 + only DFlipFlop needs to be separate object that has references to the appropriate nodes in graph for data output?
++ DFlipFlops will consist of three nodes in the graph, one for present state input, which has edges to only two nodes, both being next state nodes
