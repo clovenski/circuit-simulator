@@ -1,10 +1,10 @@
 # circuit-simulator
+
 A program that can help design simple circuits.
 
 Initial ideas/Notes:
 
-+ goal is to allow the user to design a circuit with inputs, outputs, gates and flip-flops and check the state of the entire circuit
-with each clock cycle
++ goal is to allow the user to design a circuit with inputs, outputs, gates and flip-flops and check the state of the entire circuit with each clock cycle
 + to start off small, only AND/OR/NOT gates and D flip-flops can be used, as well as user-defined input/output variables
 + the seven segment display problem can be a good milestone to target
 + the program itself will be in the command-line interface first, essentially being text-based, until fully functional

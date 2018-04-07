@@ -17,6 +17,4 @@ public abstract class Gate extends CSNode {
     public void removeInputNode(CSNode node) {
         inputNodes.remove(node);
     }
-
-    public abstract void updateValue();
 }
