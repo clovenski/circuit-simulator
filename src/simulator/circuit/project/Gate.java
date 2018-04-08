@@ -2,7 +2,7 @@ package simulator.circuit.project;
 
 import java.util.ArrayList;
 
-public abstract class Gate extends CSNode {
+public abstract class Gate extends CSNode implements Dependent {
     protected ArrayList<CSNode> inputNodes;
 
     public Gate(String name) {

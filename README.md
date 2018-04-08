@@ -18,3 +18,9 @@ Initial ideas/Notes:
 + for updating the graph, topological ordering? with DFlipFlop next state nodes updated from present state node
 + only DFlipFlop needs to be separate object that has references to the appropriate nodes in graph for data output?
 + DFlipFlops will consist of three nodes in the graph, one for present state input, which has edges to only two nodes, both being next state nodes
+
+Progress Notes:
+
++ removal of nodes and thus updating dependent nodes cannot handle Inverter objects since it does not implement Dependent
++ some remove node methods need to implement updating dependent nodes
++ current design is a mess, can continue but may need to really redesign the entire representation of nodes in the graph
