@@ -23,4 +23,3 @@ Progress Notes:
 
 + removal of nodes and thus updating dependent nodes cannot handle Inverter objects since it does not implement Dependent
 + some remove node methods need to implement updating dependent nodes
-+ current design is a mess, can continue but may need to really redesign the entire representation of nodes in the graph

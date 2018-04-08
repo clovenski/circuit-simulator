@@ -32,8 +32,36 @@ public class CSGraph {
         }
     }
 
-    public CSNode getNode(int targetIndex) {
-        return nodes.get(targetIndex);
+    public CSNode getNode(int nodeIndex) {
+        return nodes.get(nodeIndex);
+    }
+
+    public CSNode getNode(String nodeID) {
+        for(CSNode node : nodes)
+            if(node.getName() == nodeID)
+                return node;
+
+        throw new Exception(); // replace, message is node with nodeID does not exist in graph
+    }
+
+    public boolean contains(String nodeID) {
+        for(CSNode node : nodes)
+            if(node.getName() == nodeID)
+                return true;
+
+        return false;
+    }
+
+    public boolean containsEdge(int sourceIndex, int targetIndex) {
+        return edges.get(sourceIndex).contains(targetIndex);
+    }
+
+    public int indexOf(String nodeID) {
+        for(int i = 0; i < nodes.size(); i++)
+            if(nodes.get(i).getName() == nodeID)
+                return i;
+
+        return -1;
     }
 
     public void addEdge(int sourceIndex, int targetIndex) {
@@ -42,6 +70,10 @@ public class CSGraph {
 
     public void removeEdge(int sourceIndex, int targetIndex) {
         edges.get(sourceIndex).remove(targetIndex);
+    }
+
+    public int getSize() {
+        return nodes.size();
     }
 
     public String getUpdatePath() throws Exception { // replace with proper exception, message is circuit has infinite loop
