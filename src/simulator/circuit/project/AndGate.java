@@ -1,6 +1,6 @@
 package simulator.circuit.project;
 
-public class AndGate extends Gate {
+public class AndGate extends Gate implements VariableInput {
     public AndGate(String name) {
         super(name);
     }

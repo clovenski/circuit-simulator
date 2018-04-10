@@ -1,6 +1,6 @@
 package simulator.circuit.project;
 
-public class OrGate extends Gate {
+public class OrGate extends Gate implements VariableInput {
     public OrGate(String name) {
         super(name);
     }

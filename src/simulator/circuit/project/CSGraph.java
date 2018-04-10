@@ -8,7 +8,7 @@ import java.util.LinkedList;
  */
 public class CSGraph {
     private ArrayList<CSNode> nodes;
-    private ArrayList<LinkedList<Integer>> edges;
+    protected ArrayList<LinkedList<Integer>> edges; // change back to private
 
     public CSGraph() {
         nodes = new ArrayList<CSNode>();
@@ -47,7 +47,7 @@ public class CSGraph {
 
     public boolean contains(String nodeID) {
         for(CSNode node : nodes)
-            if(node.getName() == nodeID)
+            if(node.getName().equals(nodeID))
                 return true;
 
         return false;
@@ -79,26 +79,15 @@ public class CSGraph {
 
     public String getUpdatePath() throws IllegalCircuitStateException {
         char[] marks = new char[nodes.size()];
-        LinkedList<Integer> flipFlopOutNodes = new LinkedList<Integer>();
         LinkedList<Integer> indexPath = new LinkedList<Integer>();
         String updatePath = "";
 
         for(int i = 0; i < marks.length; i++)
             marks[i] = 'U';
 
-        // mark FFOutNodes as P to break cycles
-        for(int i = 0; i < nodes.size(); i++)
-            if(nodes.get(i) instanceof FFOutNode) {
-                marks[i] = 'P';
-                flipFlopOutNodes.add(i);
-            }
-
         for(int i = 0; i < marks.length; i++)
             if(marks[i] == 'U')
                 getUpdatePathUtil(marks, i, indexPath);
-
-        for(int outNodeIndex : flipFlopOutNodes)
-            indexPath.addFirst(outNodeIndex);
 
         for(int index : indexPath)
             updatePath += index + " ";
@@ -112,8 +101,10 @@ public class CSGraph {
         if(marks[nodeIndex] == 'T')
             throw new IllegalCircuitStateException(); // current graph is cyclic
         marks[nodeIndex] = 'T';
-        for(int targetNodeIndex : edges.get(nodeIndex))
-            getUpdatePathUtil(marks, targetNodeIndex, indexPath);
+        // skip for-loop for FlipFlop objects to break cycles
+        if(!(nodes.get(nodeIndex) instanceof FlipFlop))
+            for(int targetNodeIndex : edges.get(nodeIndex))
+                getUpdatePathUtil(marks, targetNodeIndex, indexPath);
         marks[nodeIndex] = 'P';
         indexPath.addFirst(nodeIndex);
     }

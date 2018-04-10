@@ -17,6 +17,9 @@ public class OutputVariableNode extends CSNode implements VariableInput {
     }
     
     public void updateValue() {
-        value = inputNode.value;
+        if(inputNode != null)
+            value = inputNode.value;
+        else
+            value = 0;
     }
 }

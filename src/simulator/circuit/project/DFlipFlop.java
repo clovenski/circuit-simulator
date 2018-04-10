@@ -25,7 +25,10 @@ public class DFlipFlop extends FlipFlop implements VariableInput {
     }
 
     public void updateValue() {
-        value = inputNode.value;
+        if(inputNode != null)
+            value = inputNode.value;
+        else
+            value = 0;
     }
 
     class IllegalDFFStateException extends RuntimeException {

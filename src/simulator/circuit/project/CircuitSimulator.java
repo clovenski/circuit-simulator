@@ -53,19 +53,21 @@ public class CircuitSimulator {
             throw new IllegalArgumentException(sourceNodeID + " cannot be a source of a connection");
         if(!(targetNode instanceof VariableInput))
             throw new IllegalArgumentException(targetNodeID + " cannot be a target of a connection");
-
-        // add edge
+        
         int sourceIndex = circuit.indexOf(sourceNodeID);
         int targetIndex = circuit.indexOf(targetNodeID);
-        circuit.addEdge(sourceIndex, targetIndex);
 
         // update target node's input reference
         VariableInput variableInputNode = (VariableInput)targetNode;
         variableInputNode.addInputNode(sourceNode);
-        // if target node was not a Gate, then need to remove previous connections, if any
+
+        // if target node was not a Gate, then first need to remove previous connections, if any
         if(!(variableInputNode instanceof Gate))
             for(int i = 0; i < circuit.getSize(); i++)
                 circuit.removeEdge(i, targetIndex);
+                
+        // now add the edge
+        circuit.addEdge(sourceIndex, targetIndex);
     }
 
     private void addInverter(String sourceNodeID, String targetNodeID) throws IllegalArgumentException {
@@ -154,6 +156,8 @@ public class CircuitSimulator {
         System.out.println(circuit.getUpdatePath()); }catch(IllegalCircuitStateException icse) {
             
         }
+        for(int i = 0; i < circuit.edges.size(); i++)
+            System.out.println(circuit.edges.get(i));
     }
 
     public static void main(String[] args) {
