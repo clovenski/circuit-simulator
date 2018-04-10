@@ -1,6 +1,6 @@
 package simulator.circuit.project;
 
-public class OutputVariableNode extends CSNode implements Dependent {
+public class OutputVariableNode extends CSNode implements VariableInput {
     private CSNode inputNode;
 
     public OutputVariableNode(String name) {

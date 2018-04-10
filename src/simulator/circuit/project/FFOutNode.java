@@ -9,6 +9,6 @@ public class FFOutNode extends CSNode {
     }
 
     public void updateValue() {
-        inputNode.getValue(this);
+        value = inputNode.getValue(this);
     }
 }

@@ -1,17 +1,22 @@
 package simulator.circuit.project;
 
 import java.util.ArrayList;
+import java.util.StringTokenizer;
+
+import simulator.circuit.project.CSGraph.IllegalCircuitStateException;
 
 public class CircuitSimulator {
     private CSGraph circuit;
     private ArrayList<String> inputNodes;
 
     public CircuitSimulator() {
-
+        circuit = new CSGraph();
+        inputNodes = new ArrayList<String>();
     }
 
     private void addInputNode(String nodeID) {
         circuit.addNode(new InputVariableNode(nodeID));
+        inputNodes.add(nodeID);
     }
 
     private void addOutputNode(String nodeID) {
@@ -19,10 +24,13 @@ public class CircuitSimulator {
     }
     
     private void addDFFNode(String nodeID) {
-        DFlipFlop newNode = new DFlipFlop(nodeID);
-        circuit.addNode(newNode);
-        circuit.addNode(new FFOutNode(nodeID + "-out", newNode));
-        circuit.addNode(new FFOutNode(nodeID + "-outnegated", newNode));
+        DFlipFlop newDFFNode = new DFlipFlop(nodeID);
+        FFOutNode newDFFNodeOut = new FFOutNode(nodeID + "-out", newDFFNode);
+        FFOutNode newDFFNodeOutNeg = new FFOutNode(nodeID + "-outnegated", newDFFNode);
+        circuit.addNode(newDFFNode);
+        circuit.addNode(newDFFNodeOut);
+        circuit.addNode(newDFFNodeOutNeg);
+        newDFFNode.setOutNodes(newDFFNodeOut, newDFFNodeOutNeg);
 
         // add appropriate edges
         circuit.addEdge(circuit.getSize() - 3, circuit.getSize() - 2);
@@ -37,14 +45,37 @@ public class CircuitSimulator {
         circuit.addNode(new OrGate(nodeID));
     }
 
-    private void addInverter(String sourceNodeID, String targetNodeID) throws IllegalArgumentException {
-        if(!circuit.contains(sourceNodeID))
-            throw new IllegalArgumentException("This circuit does not contain node: " + sourceNodeID);
-        if(!circuit.contains(targetNodeID))
-            throw new IllegalArgumentException("This circuit does not contain node: " + targetNodeID);
+    private void addConnection(String sourceNodeID, String targetNodeID) throws IllegalArgumentException {
+        CSNode sourceNode = circuit.getNode(sourceNodeID);
+        CSNode targetNode = circuit.getNode(targetNodeID);
 
+        if(sourceNode instanceof OutputVariableNode || sourceNode instanceof DFlipFlop)
+            throw new IllegalArgumentException(sourceNodeID + " cannot be a source of a connection");
+        if(!(targetNode instanceof VariableInput))
+            throw new IllegalArgumentException(targetNodeID + " cannot be a target of a connection");
+
+        // add edge
         int sourceIndex = circuit.indexOf(sourceNodeID);
         int targetIndex = circuit.indexOf(targetNodeID);
+        circuit.addEdge(sourceIndex, targetIndex);
+
+        // update target node's input reference
+        VariableInput variableInputNode = (VariableInput)targetNode;
+        variableInputNode.addInputNode(sourceNode);
+        // if target node was not a Gate, then need to remove previous connections, if any
+        if(!(variableInputNode instanceof Gate))
+            for(int i = 0; i < circuit.getSize(); i++)
+                circuit.removeEdge(i, targetIndex);
+    }
+
+    private void addInverter(String sourceNodeID, String targetNodeID) throws IllegalArgumentException {
+        int sourceIndex = circuit.indexOf(sourceNodeID);
+        int targetIndex = circuit.indexOf(targetNodeID);
+
+        if(sourceIndex == -1)
+            throw new IllegalArgumentException("This graph does not contain " + sourceNodeID);
+        if(targetIndex == -1)
+            throw new IllegalArgumentException("This graph does not contain " + targetNodeID);
         if(!circuit.containsEdge(sourceIndex, targetIndex))
             throw new IllegalArgumentException("There does not exist an edge from " + sourceNodeID + " to " + targetNodeID);
 
@@ -55,8 +86,8 @@ public class CircuitSimulator {
         circuit.addEdge(sourceIndex, newInverterIndex);
         circuit.addEdge(newInverterIndex, targetIndex);
         
-        Dependent depNode = (Dependent)circuit.getNode(targetIndex);
-        depNode.addInputNode(circuit.get(newInverterIndex));
+        VariableInput variableInputNode = (VariableInput)circuit.getNode(targetIndex);
+        variableInputNode.addInputNode(circuit.getNode(newInverterIndex));
     }
 
     private void setInputSeq(String inputNodeID, int[] newSeq) {
@@ -66,7 +97,66 @@ public class CircuitSimulator {
         node.setInputSeq(newSeq);
     }
 
-    public static void main(String[] args) {
+    private void printCircuitHeader() {
+        for(int i = 0; i < circuit.getSize(); i++) {
+            String nodeID = circuit.getNode(i).getName();
+            System.out.printf("%20s", nodeID);
+        }
+        System.out.println();
+    }
 
+    private void printCircuitStatus() {
+        for(int i = 0; i < circuit.getSize(); i++)
+            System.out.printf("%20d", circuit.getNode(i).getValue());
+
+        System.out.println();
+    }
+
+    private void updateCircuit() {
+        String updatePath = "";
+
+        try {
+            updatePath = circuit.getUpdatePath();
+        } catch(IllegalCircuitStateException icse) {
+            System.err.println(icse.getMessage());
+            return;
+        } catch(Exception e) {
+            System.err.println(e.getMessage());
+            return;
+        }
+
+        StringTokenizer tokenizer = new StringTokenizer(updatePath);
+
+        while(tokenizer.hasMoreTokens())
+            circuit.getNode(Integer.valueOf(tokenizer.nextToken())).updateValue();
+    }
+    
+    public void testProgram() {
+        addInputNode("inputnode-1");
+        addDFFNode("dffnode-1");
+        addOutputNode("outputnode-1");
+        addOutputNode("outputnode-2");
+        addAndGate("andgate-1");
+        addConnection("inputnode-1", "andgate-1");
+        addConnection("inputnode-1", "dffnode-1");
+        addConnection("dffnode-1-out", "andgate-1");
+        addConnection("andgate-1", "outputnode-1");
+        addConnection("dffnode-1-outnegated", "outputnode-2");
+        int[] sequence = new int[] {1, 1, 0, 0, 1, 0, 1, 1, 1};
+        setInputSeq("inputnode-1", sequence);
+
+        printCircuitHeader();
+        for(int i = 0; i < sequence.length; i++) {
+            updateCircuit();
+            printCircuitStatus();
+        }
+        try{
+        System.out.println(circuit.getUpdatePath()); }catch(IllegalCircuitStateException icse) {
+            
+        }
+    }
+
+    public static void main(String[] args) {
+        new CircuitSimulator().testProgram();
     }
 }

@@ -11,7 +11,8 @@ public class CSGraph {
     private ArrayList<LinkedList<Integer>> edges;
 
     public CSGraph() {
-
+        nodes = new ArrayList<CSNode>();
+        edges = new ArrayList<LinkedList<Integer>>();
     }
 
     public void addNode(CSNode newNode) {
@@ -36,12 +37,12 @@ public class CSGraph {
         return nodes.get(nodeIndex);
     }
 
-    public CSNode getNode(String nodeID) {
+    public CSNode getNode(String nodeID) throws IllegalArgumentException {
         for(CSNode node : nodes)
-            if(node.getName() == nodeID)
+            if(node.getName().equals(nodeID))
                 return node;
 
-        throw new Exception(); // replace, message is node with nodeID does not exist in graph
+        throw new IllegalArgumentException(nodeID + " does not exist in this graph");
     }
 
     public boolean contains(String nodeID) {
@@ -58,7 +59,7 @@ public class CSGraph {
 
     public int indexOf(String nodeID) {
         for(int i = 0; i < nodes.size(); i++)
-            if(nodes.get(i).getName() == nodeID)
+            if(nodes.get(i).getName().equals(nodeID))
                 return i;
 
         return -1;
@@ -69,14 +70,14 @@ public class CSGraph {
     }
 
     public void removeEdge(int sourceIndex, int targetIndex) {
-        edges.get(sourceIndex).remove(targetIndex);
+        edges.get(sourceIndex).remove(Integer.valueOf(targetIndex));
     }
 
     public int getSize() {
         return nodes.size();
     }
 
-    public String getUpdatePath() throws Exception { // replace with proper exception, message is circuit has infinite loop
+    public String getUpdatePath() throws IllegalCircuitStateException {
         char[] marks = new char[nodes.size()];
         LinkedList<Integer> flipFlopOutNodes = new LinkedList<Integer>();
         LinkedList<Integer> indexPath = new LinkedList<Integer>();
@@ -105,15 +106,22 @@ public class CSGraph {
         return updatePath;
     }
 
-    private void getUpdatePathUtil(char[] marks, int nodeIndex, LinkedList<Integer> indexPath) {
+    private void getUpdatePathUtil(char[] marks, int nodeIndex, LinkedList<Integer> indexPath) throws IllegalCircuitStateException {
         if(marks[nodeIndex] == 'P')
             return;
         if(marks[nodeIndex] == 'T')
-            throw new Exception(); // current graph is cyclic
+            throw new IllegalCircuitStateException(); // current graph is cyclic
         marks[nodeIndex] = 'T';
         for(int targetNodeIndex : edges.get(nodeIndex))
             getUpdatePathUtil(marks, targetNodeIndex, indexPath);
         marks[nodeIndex] = 'P';
         indexPath.addFirst(nodeIndex);
+    }
+
+    class IllegalCircuitStateException extends Exception {
+        private static final long serialVersionUID = 1L;
+        public IllegalCircuitStateException() {
+            super("The current state of this circuit is invalid.");
+        }
     }
 }
