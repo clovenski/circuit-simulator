@@ -1,6 +1,7 @@
 package simulator.circuit.project;
 
 public class DFlipFlop extends FlipFlop implements VariableInput {
+    private static final long serialVersionUID = 1L;
     private CSNode inputNode;
 
     public DFlipFlop(String name) {

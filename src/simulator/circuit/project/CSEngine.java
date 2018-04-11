@@ -1,5 +1,7 @@
 package simulator.circuit.project;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -273,5 +275,18 @@ public class CSEngine {
 
         while(tokenizer.hasMoreTokens())
             circuit.getNode(Integer.valueOf(tokenizer.nextToken())).updateValue();
+    }
+
+    public void resetCircuit() {
+        circuit.reset();
+    }
+    
+    public void saveCircuit(String fileName) throws FileNotFoundException, IOException, ClassNotFoundException {
+        CSFileIO.writeSaveFile(circuit, fileName);
+    }
+
+    public void loadCircuit(String fileName) throws FileNotFoundException, IOException, ClassNotFoundException {
+        circuit = CSFileIO.readSaveFile(fileName);
+        
     }
 }

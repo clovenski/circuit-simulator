@@ -18,4 +18,3 @@ Progress Notes/To-do list:
 
 + implement method to remove connection between two nodes that has an inverter within it
 + implement text-based UI
-+ implement saving and loading circuits

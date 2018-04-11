@@ -3,6 +3,7 @@ package simulator.circuit.project;
 import java.util.ArrayList;
 
 public abstract class Gate extends CSNode implements VariableInput {
+    private static final long serialVersionUID = 1L;
     protected ArrayList<CSNode> inputNodes;
 
     public Gate(String name) {

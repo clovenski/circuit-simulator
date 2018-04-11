@@ -1,12 +1,14 @@
 package simulator.circuit.project;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
 /* Graph needs to be directed, unweighted that will take in CSNode objects as its nodes.
  * Represent this graph with adjacency lists.
  */
-public class CSGraph {
+public class CSGraph implements Serializable {
+    private static final long serialVersionUID = 1L;
     private ArrayList<CSNode> nodes;
     private ArrayList<LinkedList<Integer>> edges;
 
@@ -114,6 +116,11 @@ public class CSGraph {
                 getUpdatePathUtil(marks, targetNodeIndex, indexPath);
         marks[nodeIndex] = 'P';
         indexPath.addFirst(nodeIndex);
+    }
+
+    public void reset() {
+        for(CSNode node : nodes)
+            node.resetValue();
     }
 
     class IllegalCircuitStateException extends Exception {

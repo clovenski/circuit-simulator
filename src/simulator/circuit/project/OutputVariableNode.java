@@ -1,6 +1,7 @@
 package simulator.circuit.project;
 
 public class OutputVariableNode extends CSNode implements VariableInput {
+    private static final long serialVersionUID = 1L;
     private CSNode inputNode;
 
     public OutputVariableNode(String name) {

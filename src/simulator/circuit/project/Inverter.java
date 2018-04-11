@@ -1,6 +1,7 @@
 package simulator.circuit.project;
 
 public class Inverter extends CSNode {
+    private static final long serialVersionUID = 1L;
     private final CSNode inputNode;
 
     public Inverter(String name, CSNode inputNode) {

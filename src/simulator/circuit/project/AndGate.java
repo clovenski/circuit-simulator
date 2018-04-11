@@ -1,6 +1,8 @@
 package simulator.circuit.project;
 
 public class AndGate extends Gate implements VariableInput {
+    private static final long serialVersionUID = 1L;
+
     public AndGate(String name) {
         super(name);
     }

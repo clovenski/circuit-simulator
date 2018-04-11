@@ -1,6 +1,8 @@
 package simulator.circuit.project;
 
 public class OrGate extends Gate implements VariableInput {
+    private static final long serialVersionUID = 1L;
+    
     public OrGate(String name) {
         super(name);
     }

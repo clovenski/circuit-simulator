@@ -3,6 +3,7 @@ package simulator.circuit.project;
 import simulator.circuit.project.DFlipFlop.IllegalDFFStateException;
 
 public abstract class FlipFlop extends CSNode {
+    private static final long serialVersionUID = 1L;
     protected FFOutNode outNode;
     protected FFOutNode outNodeNegated;
 

@@ -3,6 +3,7 @@ package simulator.circuit.project;
 import java.util.Arrays;
 
 public class InputVariableNode extends CSNode {
+    private static final long serialVersionUID = 1L;
     private int[] inputSeq;
     private int currentIndex;
 
