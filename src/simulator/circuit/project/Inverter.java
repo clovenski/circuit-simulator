@@ -8,6 +8,10 @@ public class Inverter extends CSNode {
         this.inputNode = inputNode;
     }
 
+    public CSNode getInputNode() {
+        return inputNode;
+    }
+
     public void updateValue() {
         value = inputNode.value == 1 ? 0 : 1;
     }

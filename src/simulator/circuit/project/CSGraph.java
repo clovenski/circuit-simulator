@@ -8,7 +8,7 @@ import java.util.LinkedList;
  */
 public class CSGraph {
     private ArrayList<CSNode> nodes;
-    protected ArrayList<LinkedList<Integer>> edges; // change back to private
+    private ArrayList<LinkedList<Integer>> edges;
 
     public CSGraph() {
         nodes = new ArrayList<CSNode>();
@@ -21,12 +21,14 @@ public class CSGraph {
     }
 
     public void removeNode(int targetIndex) {
+        int targetNodeIndex;
+
         nodes.remove(targetIndex);
         edges.remove(targetIndex);
         for(LinkedList<Integer> adjacencyList : edges) {
-            adjacencyList.remove(targetIndex);
+            adjacencyList.remove(Integer.valueOf(targetIndex));
             for(int i = 0; i < adjacencyList.size(); i++) {
-                int targetNodeIndex = adjacencyList.get(i);
+                targetNodeIndex = adjacencyList.get(i);
                 if(targetNodeIndex > targetIndex)
                     adjacencyList.set(i, targetNodeIndex - 1);
             }
@@ -42,7 +44,12 @@ public class CSGraph {
             if(node.getName().equals(nodeID))
                 return node;
 
-        throw new IllegalArgumentException(nodeID + " does not exist in this graph");
+        throw new IllegalArgumentException(nodeID + " does not exist");
+    }
+
+    public LinkedList<Integer> getAdjList(int nodeIndex) {
+        LinkedList<Integer> temp = new LinkedList<Integer>(edges.get(nodeIndex));
+        return temp;
     }
 
     public boolean contains(String nodeID) {

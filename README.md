@@ -13,13 +13,9 @@ Initial ideas/Notes:
 + a graphical representation of the circuit in the command-line interface would be ideal, but no idea for that so far
 + saving and loading to a file
 + expect the user interface to be full of options
-+ classes: DFlipFlop, Gate, Input, Output, Clock, CircuitSimulator, etc.
-+ entire program can be represented with a directed, unweighted graph represented with adjacency lists
-+ for updating the graph, topological ordering? with DFlipFlop next state nodes updated from present state node
-+ only DFlipFlop needs to be separate object that has references to the appropriate nodes in graph for data output?
-+ DFlipFlops will consist of three nodes in the graph, one for present state input, which has edges to only two nodes, both being next state nodes
 
-Progress Notes:
+Progress Notes/To-do list:
 
-+ removal of nodes and thus updating dependent nodes cannot handle Inverter objects since it does not implement Dependent
-+ some remove node methods need to implement updating dependent nodes
++ implement method to remove connection between two nodes that has an inverter within it
++ implement text-based UI
++ implement saving and loading circuits
