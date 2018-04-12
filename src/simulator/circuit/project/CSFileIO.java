@@ -9,8 +9,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 public class CSFileIO {
-    private static String fileSeparator = System.getProperty("file.separator");
-    private static String saveDirName = "cs-saves";
+    private static final String fileSeparator = System.getProperty("file.separator");
+    private static final String saveDirName = "cs-saves";
 
     public CSFileIO() {
 
@@ -38,8 +38,6 @@ public class CSFileIO {
         CSGraph circuitGraph;
 
         File file = new File(saveDirName + fileSeparator + fileName);
-        if(!file.exists())
-            throw new IllegalArgumentException(fileName + " does not exist.");
 
         fis = new FileInputStream(file);
         ois = new ObjectInputStream(fis);
@@ -50,5 +48,9 @@ public class CSFileIO {
         fis.close();
 
         return circuitGraph;
+    }
+
+    public static File getSaveDir() {
+        return new File(saveDirName);
     }
 }

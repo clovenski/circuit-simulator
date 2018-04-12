@@ -11,16 +11,20 @@ import simulator.circuit.project.CSGraph.IllegalCircuitStateException;
 
 public class CSEngine {
     private CSGraph circuit;
-    private ArrayList<String> inputNodes;
+    private ArrayList<String> inputNodeNames;
 
     public CSEngine() {
         circuit = new CSGraph();
-        inputNodes = new ArrayList<String>();
+        inputNodeNames = new ArrayList<String>();
+    }
+
+    public CSEngine(String fileName) throws FileNotFoundException, IOException, ClassNotFoundException {
+        circuit = CSFileIO.readSaveFile(fileName);
     }
 
     public void addInputNode(String nodeID) {
         circuit.addNode(new InputVariableNode(nodeID));
-        inputNodes.add(nodeID);
+        inputNodeNames.add(nodeID);
     }
 
     public void addOutputNode(String nodeID) {
@@ -178,7 +182,7 @@ public class CSEngine {
 
         Collections.sort(indecesToRemove);
         for(int i = indecesToRemove.size() - 1; i >= 0; i--)
-                circuit.removeNode(indecesToRemove.get(i));
+            circuit.removeNode(indecesToRemove.get(i));
     }
 
     private void removeDFFNode(int nodeIndex) {
@@ -218,7 +222,7 @@ public class CSEngine {
 
         Collections.sort(indecesToRemove);
         for(int i = indecesToRemove.size() - 1; i >= 0; i--)
-                circuit.removeNode(indecesToRemove.get(i));
+            circuit.removeNode(indecesToRemove.get(i));
     }
 
     public void setInputSeq(String inputNodeID, int[] newSeq) {

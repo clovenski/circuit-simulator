@@ -2,6 +2,8 @@
 
 A program that can help design simple circuits.
 
+This is currently a work in progress.
+
 Initial ideas/Notes:
 
 + goal is to allow the user to design a circuit with inputs, outputs, gates and flip-flops and check the state of the entire circuit with each clock cycle
