@@ -1,3 +1,4 @@
-src/cs-saves
+src/*
+!src/simulator/
 src/simulator/circuit/project/*
 !src/simulator/circuit/project/*.java
