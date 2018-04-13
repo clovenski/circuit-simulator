@@ -65,7 +65,7 @@ public class CSEngine {
             throw new IllegalArgumentException("There does not exist an edge from " + sourceNodeID + " to " + targetNodeID);
 
         circuit.removeEdge(sourceIndex, targetIndex);
-        circuit.addNode(new Inverter(sourceNodeID + "-" + targetNodeID + "-inverter", circuit.getNode(sourceIndex)));
+        circuit.addNode(new Inverter(sourceNodeID + "-inverter", circuit.getNode(sourceIndex)));
         int newInverterIndex = circuit.getSize() - 1;
 
         circuit.addEdge(sourceIndex, newInverterIndex);
