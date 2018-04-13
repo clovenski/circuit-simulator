@@ -65,7 +65,7 @@ public class CSEngine {
             throw new IllegalArgumentException("There does not exist an edge from " + sourceNodeID + " to " + targetNodeID);
 
         circuit.removeEdge(sourceIndex, targetIndex);
-        circuit.addNode(new Inverter(sourceIndex + "-" + targetIndex + "-inverter", circuit.getNode(sourceIndex)));
+        circuit.addNode(new Inverter(sourceNodeID + "-" + targetNodeID + "-inverter", circuit.getNode(sourceIndex)));
         int newInverterIndex = circuit.getSize() - 1;
 
         circuit.addEdge(sourceIndex, newInverterIndex);
@@ -241,7 +241,7 @@ public class CSEngine {
         return nodeNames;
     }
 
-    public int[] getCurrentCircuitStatus() {
+    public int[] getCurrentCircuitState() {
         int[] nodeValues = new int[circuit.getSize()];
 
         for(int i = 0; i < circuit.getSize(); i++)
@@ -250,7 +250,7 @@ public class CSEngine {
         return nodeValues;
     }
 
-    public int[] getNextCircuitStatus() {
+    public int[] getNextCircuitState() {
         int[] nodeValues = new int[circuit.getSize()];
 
         updateCircuit();
@@ -285,6 +285,53 @@ public class CSEngine {
         circuit.reset();
     }
     
+    public String[] getInputNodeNames() {
+        return (String[])inputNodeNames.toArray();
+    }
+
+    public int[] getCircuitStatus() {
+        int[] status = new int[7];
+        CSNode node;
+        int inputNodes = 0;
+        int sequences = 0;
+        int outNodes = 0;
+        int flipFlops = 0;
+        int gates = 0;
+        int inverters = 0;
+        int connections;
+
+        for(int i = 0; i < circuit.getSize(); i++) {
+            node = circuit.getNode(i);
+
+            if(node instanceof InputVariableNode) {
+                inputNodes++;
+                InputVariableNode inputNode = (InputVariableNode)node;
+                if(inputNode.getInputSeq() != null)
+                    sequences++;
+                
+            } else if(node instanceof OutputVariableNode)
+                outNodes++;
+            else if(node instanceof FlipFlop)
+                flipFlops++;
+            else if(node instanceof Gate)
+                gates++;
+            else if(node instanceof Inverter)
+                inverters++;
+        }
+
+        connections = circuit.getEdgeCount();
+
+        status[0] = inputNodes;
+        status[1] = sequences;
+        status[2] = outNodes;
+        status[3] = flipFlops;
+        status[4] = gates;
+        status[5] = inverters;
+        status[6] = connections;
+
+        return status;
+    }
+
     public void saveCircuit(String fileName) throws FileNotFoundException, IOException, ClassNotFoundException {
         CSFileIO.writeSaveFile(circuit, fileName);
     }

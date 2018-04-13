@@ -5,12 +5,10 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays; // imported for testing, remove later
 import java.util.Date;
-import java.util.NoSuchElementException;
 import java.util.Scanner;
-import java.util.StringTokenizer;
 
 public class CircuitSimulator {
-    private Scanner input;
+    private Scanner inputSource;
     private String circuitName;
     private CSEngine engine;
     private boolean changesMade;
@@ -19,7 +17,7 @@ public class CircuitSimulator {
         engine = new CSEngine();
         circuitName = "new-circuit";
         changesMade = false;
-        input = new Scanner(System.in);
+        inputSource = new Scanner(System.in);
     }
 
     public CircuitSimulator(String fileName) {
@@ -39,7 +37,7 @@ public class CircuitSimulator {
         }
 
         changesMade = false;
-        input = new Scanner(System.in);
+        inputSource = new Scanner(System.in);
     }
 
     public void start() {
@@ -57,12 +55,12 @@ public class CircuitSimulator {
 
         // print welcome message
         System.out.println("//////// Welcome to Circuit Simulator.");
-        System.out.println("\\\\\\\\\\\\\\\\-----------------------------\n");
+        System.out.println("\\\\\\\\\\\\\\\\-----------------------------");
         
         do {
             files = CSFileIO.getSaveDir().listFiles();
             if(files != null) {
-                System.out.printf("%-20s %s\n", "Saved Circuits", "Last Modified");
+                System.out.printf("\n%-20s %s\n", "Saved Circuits", "Last Modified");
                 System.out.println("-------------------- --------------------------");
 
                 for(File file : files)
@@ -74,11 +72,11 @@ public class CircuitSimulator {
             System.out.println("Selected circuit: " + circuitName + "\n");
 
             System.out.println("CS > Main Menu");
-            displayOptions(options);
-            userInput = getUserOptInput(options);
+            CSUserInterface.displayOptions(options);
+            userInput = CSUserInterface.getUserOptInput(options, inputSource);
 
             switch(userInput) {
-                case 1:     printCircuitStatus();
+                case 1:     printCircuitInfo();
                             break;
                 case 2:     editCircuit();
                             break;
@@ -93,12 +91,13 @@ public class CircuitSimulator {
         } while(true);
     }
 
-    private void printCircuitStatus() {
+    private void printCircuitInfo() {
 
     }
 
     private void editCircuit() {
-
+        CircuitEditor editor = new CircuitEditor(engine, circuitName, inputSource);
+        editor.start();
     }
 
     private void testCircuit() {
@@ -108,10 +107,13 @@ public class CircuitSimulator {
     private void saveCircuit() {
         File[] files = CSFileIO.getSaveDir().listFiles();
         String fileName;
+        int userInput;
         boolean overwriting = false;
 
+        System.out.println("CS > Main Menu > Save");
+
         System.out.print("Save as: ");
-        fileName = input.nextLine();
+        fileName = inputSource.nextLine();
 
         for(int i = 0; i < files.length; i++) 
             if(files[0].getName().equals(fileName)) {
@@ -120,7 +122,28 @@ public class CircuitSimulator {
             }
 
         if(overwriting) {
-            System.out.println(""); // user options: yes overwrite that file, or not
+            ArrayList<String> options = new ArrayList<String>();
+            options.add("Yes");
+            options.add("No");
+
+            System.out.println(fileName + " already exists. Would you like to overwrite it?");
+            System.out.println("Enter 1 to overwrite, or 2 to cancel.");
+            userInput = CSUserInterface.getUserOptInput(options, inputSource);
+
+            if(userInput == 1) {
+                try {
+                    engine.saveCircuit(fileName);
+                } catch(Exception e) {
+                    System.err.println("Unknown error: " + e.getMessage());
+                }
+            }
+
+        } else { // fileName does not exist in save folder, okay to save
+            try {
+                engine.saveCircuit(fileName);
+            } catch(Exception e) {
+                System.err.println("Unknown error: " + e.getMessage());
+            }
         }
     }
 
@@ -130,9 +153,11 @@ public class CircuitSimulator {
         File[] files = CSFileIO.getSaveDir().listFiles();
 
         if(files == null) {
-            System.err.println("No saves are available to load from.");
+            System.err.println("\nNo saves are available to load from.");
             return;
         }
+
+        System.out.println("\nCS > Main Menu > Load");
 
         System.out.println("Warning: unsaved changes will not be saved.\n" +
                             "If you want to save any changes, go back and save first.");
@@ -141,9 +166,14 @@ public class CircuitSimulator {
         for(File file : files)
             options.add(file.getName());
 
+        options.add("Return to Main Menu");
+
         System.out.println("Choose a file to load from:");
-        displayOptions(options);
-        userInput = getUserOptInput(options);
+        CSUserInterface.displayOptions(options);
+        userInput = CSUserInterface.getUserOptInput(options, inputSource);
+
+        if(userInput == options.size()) // last option is to return/cancel
+            return;
 
         newCircuitName = options.get(userInput - 1);
         try {
@@ -153,43 +183,6 @@ public class CircuitSimulator {
         } catch(Exception e) {
             System.err.println("Unknown error: " + e.getMessage());
         }
-    }
-
-    private void displayOptions(ArrayList<String> options) {
-        int optNum = 1;
-
-        for(String option : options) {
-            System.out.println(optNum + ". " + option);
-            optNum++;
-        }
-        System.out.println();
-    }
-
-    private int getUserOptInput(ArrayList<String> options) {
-        StringTokenizer tokenizer;
-        int userInput = 0;
-
-        do {
-            System.out.print("Enter the option number > ");
-            try {
-                tokenizer = new StringTokenizer(input.nextLine());
-                userInput = Integer.parseInt(tokenizer.nextToken());
-            } catch(NumberFormatException nfe) {
-                System.err.println("Invalid input. Please enter an integer.");
-                continue;
-            } catch(NoSuchElementException nsee) {
-                System.err.println("Please enter an input.");
-                continue;
-            }
-
-            if(userInput <= 0 || userInput > options.size()) {
-                System.err.println("Invalid input.");
-                continue;
-            }
-
-            // reachable only for valid inputs
-            return userInput;
-        } while(true);
     }
 
     public void exit() {
@@ -205,7 +198,7 @@ public class CircuitSimulator {
             options.add("Yes");
             options.add("No");
 
-            userInput = getUserOptInput(options);
+            userInput = CSUserInterface.getUserOptInput(options, inputSource);
             if(userInput == 1) {
                 try {
                     engine.saveCircuit(circuitName);
@@ -214,6 +207,7 @@ public class CircuitSimulator {
                 }
             }
         }
+        inputSource.close();
     }
 
     public void testProgram() {
@@ -242,7 +236,7 @@ public class CircuitSimulator {
 
         int[] nodeValues;
         for(int i = 0; i < sequence.length; i++) {
-            nodeValues = engine.getNextCircuitStatus();
+            nodeValues = engine.getNextCircuitState();
             for(int value : nodeValues)
                 System.out.printf("%23d", value);
             System.out.println();

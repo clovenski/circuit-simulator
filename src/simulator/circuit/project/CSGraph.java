@@ -86,6 +86,15 @@ public class CSGraph implements Serializable {
         return nodes.size();
     }
 
+    public int getEdgeCount() {
+        int count = 0;
+
+        for(LinkedList<Integer> adjList : edges)
+            count += adjList.size();
+
+        return count;
+    }
+
     public String getUpdatePath() throws IllegalCircuitStateException {
         char[] marks = new char[nodes.size()];
         LinkedList<Integer> indexPath = new LinkedList<Integer>();
