@@ -113,7 +113,7 @@ public class CircuitSimulator {
         System.out.println("CS > Main Menu > Save");
 
         System.out.print("Save as: ");
-        fileName = inputSource.nextLine();
+        fileName = CSUserInterface.getUserStringInput(inputSource);
 
         for(int i = 0; i < files.length; i++) 
             if(files[0].getName().equals(fileName)) {

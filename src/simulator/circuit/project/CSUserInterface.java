@@ -31,6 +31,9 @@ public class CSUserInterface {
             } catch(NoSuchElementException nsee) {
                 System.err.println("Please enter an input.");
                 continue;
+            } catch(Exception e) {
+                System.err.println("Unknown error. Please try again.");
+                continue;
             }
 
             if(userInput <= 0 || userInput > options.size()) {
@@ -40,6 +43,21 @@ public class CSUserInterface {
 
             // reachable only for valid inputs
             return userInput;
+        } while(true);
+    }
+
+    public static String getUserStringInput(Scanner inputSource) {
+        StringTokenizer tokenizer;
+
+        do {
+            try {
+                tokenizer = new StringTokenizer(inputSource.nextLine());
+                return tokenizer.nextToken();
+            } catch(NoSuchElementException nsee) {
+                System.err.println("Please enter an input.");
+            } catch(Exception e) {
+                System.err.println("Unknown error. Please try again.");
+            }
         } while(true);
     }
 }

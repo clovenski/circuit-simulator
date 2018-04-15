@@ -285,6 +285,14 @@ public class CSEngine {
         circuit.reset();
     }
     
+    public String[] getCircuitNodeNames() {
+        String[] result = new String[circuit.getSize()];
+        for(int i = 0; i < circuit.getSize(); i++)
+            result[i] = circuit.getNode(i).getName();
+
+        return result;
+    }
+
     public String[] getInputNodeNames() {
         return (String[])inputNodeNames.toArray();
     }

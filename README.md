@@ -18,7 +18,9 @@ Initial ideas/Notes:
 
 Progress Notes/To-do list:
 
-+ implement method to remove connection between two nodes that has an inverter within it
 + implement text-based UI
   + implement testing circuit in CircuitTester class
   + finish implementing CircuitEditor class
++ change addInverter method in CSEngine to accept only 1 parameter, the nodeID of the node it is going to invert, changing it to be adding inverters onto nodes instead of edges
++ issue: nodes can be added with a nodeID that already exists in the graph, have the engine check for that
++ redesign how to output circuit node names in CS > Main Menu > Edit Nodes > Add Node
