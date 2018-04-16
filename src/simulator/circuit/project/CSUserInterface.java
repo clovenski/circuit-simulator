@@ -46,10 +46,11 @@ public class CSUserInterface {
         } while(true);
     }
 
-    public static String getUserStringInput(Scanner inputSource) {
+    public static String getUserStringInput(String prompt, Scanner inputSource) {
         StringTokenizer tokenizer;
 
         do {
+            System.out.print(prompt);
             try {
                 tokenizer = new StringTokenizer(inputSource.nextLine());
                 return tokenizer.nextToken();
@@ -57,6 +58,33 @@ public class CSUserInterface {
                 System.err.println("Please enter an input.");
             } catch(Exception e) {
                 System.err.println("Unknown error. Please try again.");
+            }
+        } while(true);
+    }
+
+    public static int getUserIntInput(String prompt, int upperBound, Scanner inputSource) {
+        StringTokenizer tokenizer;
+        int userInput;
+
+        do {
+            System.out.print(prompt);
+            try {
+                tokenizer = new StringTokenizer(inputSource.nextLine());
+                userInput = Integer.parseInt(tokenizer.nextToken());
+
+                if(userInput <= 0 || userInput > upperBound)
+                    throw new IllegalArgumentException("Please enter an integer within the interval [1, " + upperBound + "]");
+                
+                return userInput;
+            } catch(NumberFormatException nfe) {
+                System.err.println("Invalid input. Please enter an integer.");
+                continue;
+            } catch(NoSuchElementException nsee) {
+                System.err.println("Please enter an input.");
+                continue;
+            } catch(Exception e) {
+                System.err.println("Unknown error. Please try again.");
+                continue;
             }
         } while(true);
     }

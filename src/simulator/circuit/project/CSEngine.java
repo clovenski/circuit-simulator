@@ -2,6 +2,7 @@ package simulator.circuit.project;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -9,29 +10,28 @@ import java.util.StringTokenizer;
 
 import simulator.circuit.project.CSGraph.IllegalCircuitStateException;
 
-public class CSEngine {
+public class CSEngine implements Serializable {
+    private static final long serialVersionUID = 1L;
     private CSGraph circuit;
     private ArrayList<String> inputNodeNames;
+    private ArrayList<String> invertedNodes;
 
     public CSEngine() {
         circuit = new CSGraph();
         inputNodeNames = new ArrayList<String>();
+        invertedNodes = new ArrayList<String>();
     }
 
-    public CSEngine(String fileName) throws FileNotFoundException, IOException, ClassNotFoundException {
-        circuit = CSFileIO.readSaveFile(fileName);
-    }
-
-    public void addInputNode(String nodeID) {
+    public void addInputNode(String nodeID) throws IllegalArgumentException {
         circuit.addNode(new InputVariableNode(nodeID));
         inputNodeNames.add(nodeID);
     }
 
-    public void addOutputNode(String nodeID) {
+    public void addOutputNode(String nodeID) throws IllegalArgumentException {
         circuit.addNode(new OutputVariableNode(nodeID));
     }
     
-    public void addDFFNode(String nodeID) {
+    public void addDFFNode(String nodeID) throws IllegalArgumentException {
         DFlipFlop newDFFNode = new DFlipFlop(nodeID);
         FFOutNode newDFFNodeOut = new FFOutNode(nodeID + "-out", newDFFNode);
         FFOutNode newDFFNodeOutNeg = new FFOutNode(nodeID + "-outnegated", newDFFNode);
@@ -45,34 +45,27 @@ public class CSEngine {
         circuit.addEdge(circuit.getSize() - 3, circuit.getSize() - 1);
     }
 
-    public void addAndGate(String nodeID) {
+    public void addAndGate(String nodeID) throws IllegalArgumentException {
         circuit.addNode(new AndGate(nodeID));
     }
 
-    public void addOrGate(String nodeID) {
+    public void addOrGate(String nodeID) throws IllegalArgumentException {
         circuit.addNode(new OrGate(nodeID));
     }
 
-    public void addInverter(String sourceNodeID, String targetNodeID) throws IllegalArgumentException {
+    public void addInverter(String sourceNodeID) throws IllegalArgumentException {
         int sourceIndex = circuit.indexOf(sourceNodeID);
-        int targetIndex = circuit.indexOf(targetNodeID);
 
         if(sourceIndex == -1)
             throw new IllegalArgumentException("This circuit does not contain " + sourceNodeID);
-        if(targetIndex == -1)
-            throw new IllegalArgumentException("This circuit does not contain " + targetNodeID);
-        if(!circuit.containsEdge(sourceIndex, targetIndex))
-            throw new IllegalArgumentException("There does not exist an edge from " + sourceNodeID + " to " + targetNodeID);
+        if(circuit.getNode(sourceIndex) instanceof FlipFlop)
+            throw new IllegalArgumentException("Flip flops already have a negated output node");
 
-        circuit.removeEdge(sourceIndex, targetIndex);
         circuit.addNode(new Inverter(sourceNodeID + "-inverter", circuit.getNode(sourceIndex)));
         int newInverterIndex = circuit.getSize() - 1;
 
         circuit.addEdge(sourceIndex, newInverterIndex);
-        circuit.addEdge(newInverterIndex, targetIndex);
-        
-        VariableInput variableInputNode = (VariableInput)circuit.getNode(targetIndex);
-        variableInputNode.addInputNode(circuit.getNode(newInverterIndex));
+        invertedNodes.add(sourceNodeID);
     }
 
     public void addConnection(String sourceNodeID, String targetNodeID) throws IllegalArgumentException {
@@ -100,6 +93,34 @@ public class CSEngine {
         circuit.addEdge(sourceIndex, targetIndex);
     }
 
+    public void renameNode(int nodeIndex, String newName) throws IllegalArgumentException {
+        CSNode targetNode;
+        String targetNodeName;
+
+        if(nodeIndex < 0 || nodeIndex >= circuit.getSize())
+            throw new IllegalArgumentException("The given node index is invalid");
+        
+        targetNode = circuit.getNode(nodeIndex);
+        targetNodeName = targetNode.getName();
+
+        if(targetNode instanceof FFOutNode)
+            throw new IllegalArgumentException("Output nodes for flip flops cannot be renamed directly, try renaming the flip flop instead");
+        if(targetNode instanceof Inverter)
+            throw new IllegalArgumentException("Inverter nodes cannot be renamed directly, try renaming the node it inverts instead");
+        
+        targetNode.setName(newName);
+
+        // rename target node's inverter as well, if it exists
+        if(invertedNodes.contains(targetNodeName))
+            circuit.getNode(targetNodeName + "-inverter").setName(newName + "-inverter");
+        
+        // if renamed a flip flop, also need to rename its output nodes
+        if(targetNode instanceof FlipFlop) {
+            circuit.getNode(nodeIndex + 1).setName(newName + "-out");
+            circuit.getNode(nodeIndex + 2).setName(newName + "-outnegated");
+        }
+    }
+
     public void removeConnection(String sourceNodeID, String targetNodeID) throws IllegalArgumentException {
         int sourceIndex = circuit.indexOf(sourceNodeID);
         int targetIndex = circuit.indexOf(targetNodeID);
@@ -119,16 +140,18 @@ public class CSEngine {
             throw new IllegalArgumentException("Please refer to this flip flop's output nodes instead");
 
         circuit.removeEdge(sourceIndex, targetIndex);
-        VariableInput varInputNode = (VariableInput)targetNode;
-        varInputNode.removeInputNode(circuit.getNode(sourceIndex));
 
         // inverters cannot exist without an input
         if(targetNode instanceof Inverter) {
             ArrayList<Integer> indecesToRemove = new ArrayList<Integer>();
             removeInverter(targetIndex, indecesToRemove);
-            Collections.sort(indecesToRemove);
-            for(int i = indecesToRemove.size() - 1; i >= 0; i--)
-                circuit.removeNode(indecesToRemove.get(i));
+            // no need to sort indecesToRemove list since inverters cannot point to other inverters,
+            // thus only the inverter's index will be in the list as the first element
+            circuit.removeNode(indecesToRemove.get(0));
+            invertedNodes.remove(sourceNodeID);
+        } else { // only need to update input node reference to target node
+            VariableInput varInputNode = (VariableInput)targetNode;
+            varInputNode.removeInputNode(circuit.getNode(sourceIndex));
         }
     }
 
@@ -141,12 +164,8 @@ public class CSEngine {
         for(int neighborIndex : circuit.getAdjList(inverterIndex)) {
             neighborNode = circuit.getNode(neighborIndex);
 
-            if(neighborNode instanceof Inverter)
-                removeInverter(neighborIndex, indecesToRemove);
-            else {
-                varInputNode = (VariableInput)neighborNode;
-                varInputNode.removeInputNode(circuit.getNode(inverterIndex));
-            }
+            varInputNode = (VariableInput)neighborNode;
+            varInputNode.removeInputNode(circuit.getNode(inverterIndex));
         }
     }
 
@@ -163,6 +182,11 @@ public class CSEngine {
             removeDFFNode(nodeIndex);
             return;
         }
+        if(node instanceof Inverter) {
+            // need to remove the source of this inverter from the invertedNodes list
+            Inverter inverterNode = (Inverter)node;
+            invertedNodes.remove(inverterNode.getInputNode().getName());
+        }
 
         CSNode neighborNode;
         VariableInput varInputNode;
@@ -172,9 +196,10 @@ public class CSEngine {
         for(int neighborIndex : circuit.getAdjList(nodeIndex)) {
             neighborNode = circuit.getNode(neighborIndex);
 
-            if(neighborNode instanceof Inverter)
+            if(neighborNode instanceof Inverter) {
                 removeInverter(neighborIndex, indecesToRemove);
-            else {
+                invertedNodes.remove(nodeID);
+            } else {
                 varInputNode = (VariableInput)neighborNode;
                 varInputNode.removeInputNode(circuit.getNode(nodeIndex));
             }
@@ -193,6 +218,9 @@ public class CSEngine {
         indecesToRemove.add(nodeIndex + 1);
         indecesToRemove.add(nodeIndex + 2);
 
+        String outNodeID = circuit.getNode(nodeIndex + 1).getName();
+        String outNodeNegatedID = circuit.getNode(nodeIndex + 2).getName();
+
         LinkedList<Integer> outNodeAdjList = circuit.getAdjList(nodeIndex + 1);
         LinkedList<Integer> outNodeNegAdjList = circuit.getAdjList(nodeIndex + 2);
 
@@ -200,9 +228,10 @@ public class CSEngine {
         for(int neighborIndex : outNodeAdjList) {
             neighborNode = circuit.getNode(neighborIndex);
 
-            if(neighborNode instanceof Inverter)
+            if(neighborNode instanceof Inverter) {
                 removeInverter(neighborIndex, indecesToRemove);
-            else {
+                invertedNodes.remove(outNodeID);
+            } else {
                 varInputNode = (VariableInput)neighborNode;
                 varInputNode.removeInputNode(circuit.getNode(nodeIndex));
             }
@@ -212,9 +241,10 @@ public class CSEngine {
         for(int neighborIndex : outNodeNegAdjList) {
             neighborNode = circuit.getNode(neighborIndex);
 
-            if(neighborNode instanceof Inverter)
+            if(neighborNode instanceof Inverter) {
                 removeInverter(neighborIndex, indecesToRemove);
-            else {
+                invertedNodes.remove(outNodeNegatedID);
+            } else {
                 varInputNode = (VariableInput)neighborNode;
                 varInputNode.removeInputNode(circuit.getNode(nodeIndex));
             }
@@ -297,6 +327,10 @@ public class CSEngine {
         return (String[])inputNodeNames.toArray();
     }
 
+    public int getCircuitSize() {
+        return circuit.getSize();
+    }
+
     public int[] getCircuitStatus() {
         int[] status = new int[7];
         CSNode node;
@@ -314,7 +348,7 @@ public class CSEngine {
             if(node instanceof InputVariableNode) {
                 inputNodes++;
                 InputVariableNode inputNode = (InputVariableNode)node;
-                if(inputNode.getInputSeq() != null)
+                if(!inputNode.getInputSeq().equals("null"))
                     sequences++;
                 
             } else if(node instanceof OutputVariableNode)
@@ -338,14 +372,5 @@ public class CSEngine {
         status[6] = connections;
 
         return status;
-    }
-
-    public void saveCircuit(String fileName) throws FileNotFoundException, IOException, ClassNotFoundException {
-        CSFileIO.writeSaveFile(circuit, fileName);
-    }
-
-    public void loadCircuit(String fileName) throws FileNotFoundException, IOException, ClassNotFoundException {
-        circuit = CSFileIO.readSaveFile(fileName);
-        
     }
 }

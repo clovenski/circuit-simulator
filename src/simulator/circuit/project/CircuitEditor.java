@@ -100,6 +100,7 @@ public class CircuitEditor {
     private void addNode() {
         int userInput;
         String newNodeName = "";
+        String sourceNodeID = "";
         ArrayList<String> options = new ArrayList<String>();
         options.add("Add an input node");
         options.add("Add an output node");
@@ -109,38 +110,66 @@ public class CircuitEditor {
         options.add("Add an inverter");
         options.add("Return");
 
-        System.out.println("\nCS > Main Menu > Circuit Editor > Edit Nodes > Add Node");
-        CSUserInterface.displayOptions(options);
-        userInput = CSUserInterface.getUserOptInput(options, inputSource);
+        do {
+            System.out.println("\nCS > Main Menu > Circuit Editor > Edit Nodes > Add Node");
+            CSUserInterface.displayOptions(options);
+            userInput = CSUserInterface.getUserOptInput(options, inputSource);
 
-        if(userInput == 6) { // if user wants to add an inverter
+            if(userInput == 6) { // if user wants to add an inverter
+                sourceNodeID = CSUserInterface.getUserStringInput("Name of the node to invert: ", inputSource);
+            } else if(userInput != 7) {// if user does not want to "return"
+                newNodeName = CSUserInterface.getUserStringInput("Node name: ", inputSource);
+            }
 
-        } else if(userInput != 7) {// if user does not want to "return"
-            System.out.print("Node name: ");
-            newNodeName = CSUserInterface.getUserStringInput(inputSource);
-        }
-
-        switch(userInput) {
-            case 1:     engine.addInputNode(newNodeName);
-                        break;
-            case 2:     engine.addOutputNode(newNodeName);
-                        break;
-            case 3:     engine.addDFFNode(newNodeName);
-                        break;
-            case 4:     engine.addAndGate(newNodeName);
-                        break;
-            case 5:     engine.addOrGate(newNodeName);
-                        break;
-            case 6:     
-        }
+            try {
+                switch(userInput) {
+                    case 1:     engine.addInputNode(newNodeName);
+                                break;
+                    case 2:     engine.addOutputNode(newNodeName);
+                                break;
+                    case 3:     engine.addDFFNode(newNodeName);
+                                break;
+                    case 4:     engine.addAndGate(newNodeName);
+                                break;
+                    case 5:     engine.addOrGate(newNodeName);
+                                break;
+                    case 6:     engine.addInverter(sourceNodeID);
+                                break;
+                    case 7:     return;
+                }
+            } catch(IllegalArgumentException iae) {
+                System.err.println(iae.getMessage());
+                continue;
+            }
+            System.out.println("\nSuccessfully created a new node in the circuit");
+        } while(true);
     }
 
     private void removeNode() {
-        System.out.println("CS > Main Menu > Circuit Editor > Edit Nodes > Remove Node");
+        String targetNode;
+        System.out.println("\nCS > Main Menu > Circuit Editor > Edit Nodes > Remove Node");
+        targetNode = CSUserInterface.getUserStringInput("Name of the node to remove: ", inputSource);
+        try {
+            engine.removeNode(targetNode);
+            System.out.println("\nSuccessfully removed " + targetNode);
+        } catch(IllegalArgumentException iae) {
+            System.err.println(iae.getMessage());
+        }
     }
 
     private void renameNode() {
+        int userIntInput;
+        String newName;
 
+        userIntInput = CSUserInterface.getUserIntInput("Enter the number of the node to rename: ", engine.getCircuitSize(), inputSource);
+        newName = CSUserInterface.getUserStringInput("Enter the new name: ", inputSource);
+
+        try {
+            engine.renameNode(userIntInput - 1, newName);
+            System.out.println("\nSuccessfully renamed node to: " + newName);
+        } catch(IllegalArgumentException iae) {
+            System.err.println(iae.getMessage());
+        }
     }
 
     private void editConnections() {

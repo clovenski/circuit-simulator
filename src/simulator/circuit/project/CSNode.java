@@ -14,6 +14,10 @@ public abstract class CSNode implements Serializable {
         this.name = name;
     }
 
+    public void setName(String newName) {
+        name = newName;
+    }
+
     public String getName() {
         return name;
     }

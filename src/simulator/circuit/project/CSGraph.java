@@ -17,7 +17,13 @@ public class CSGraph implements Serializable {
         edges = new ArrayList<LinkedList<Integer>>();
     }
 
-    public void addNode(CSNode newNode) {
+    public void addNode(CSNode newNode) throws IllegalArgumentException {
+        String newNodeName = newNode.getName();
+
+        for(CSNode node : nodes)
+            if(newNodeName.equals(node.getName()))
+                throw new IllegalArgumentException("Node with that name already exists");
+        
         nodes.add(newNode);
         edges.add(new LinkedList<Integer>());
     }
