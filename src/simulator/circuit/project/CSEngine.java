@@ -60,6 +60,8 @@ public class CSEngine implements Serializable {
             throw new IllegalArgumentException("This circuit does not contain " + sourceNodeID);
         if(circuit.getNode(sourceIndex) instanceof FlipFlop)
             throw new IllegalArgumentException("Flip flops already have a negated output node");
+        if(circuit.getNode(sourceIndex) instanceof OutputVariableNode)
+            throw new IllegalArgumentException("Output nodes cannot be inverted");
 
         circuit.addNode(new Inverter(sourceNodeID + "-inverter", circuit.getNode(sourceIndex)));
         int newInverterIndex = circuit.getSize() - 1;
@@ -68,17 +70,26 @@ public class CSEngine implements Serializable {
         invertedNodes.add(sourceNodeID);
     }
 
-    public void addConnection(String sourceNodeID, String targetNodeID) throws IllegalArgumentException {
-        CSNode sourceNode = circuit.getNode(sourceNodeID);
-        CSNode targetNode = circuit.getNode(targetNodeID);
+    public void addConnection(int sourceIndex, int targetIndex) throws IllegalArgumentException {
+        CSNode sourceNode;
+        CSNode targetNode;
+
+        try {
+            sourceNode = circuit.getNode(sourceIndex);
+        } catch(IndexOutOfBoundsException ioobe) {
+            throw new IllegalArgumentException(sourceIndex + " is an invalid index");
+        }
+
+        try {
+            targetNode = circuit.getNode(targetIndex);
+        } catch(IndexOutOfBoundsException ioobe) {
+            throw new IllegalArgumentException(targetIndex + " is an invalid index");
+        }
 
         if(sourceNode instanceof OutputVariableNode || sourceNode instanceof DFlipFlop)
-            throw new IllegalArgumentException(sourceNodeID + " cannot be a source of a connection");
+            throw new IllegalArgumentException(sourceNode.getName() + " cannot be a source of a connection");
         if(!(targetNode instanceof VariableInput))
-            throw new IllegalArgumentException(targetNodeID + " cannot be a target of a connection");
-        
-        int sourceIndex = circuit.indexOf(sourceNodeID);
-        int targetIndex = circuit.indexOf(targetNodeID);
+            throw new IllegalArgumentException(targetNode.getName() + " cannot be a target of a connection");
 
         // update target node's input reference
         VariableInput variableInputNode = (VariableInput)targetNode;
@@ -88,7 +99,7 @@ public class CSEngine implements Serializable {
         if(!(variableInputNode instanceof Gate))
             for(int i = 0; i < circuit.getSize(); i++)
                 circuit.removeEdge(i, targetIndex);
-                
+        
         // now add the edge
         circuit.addEdge(sourceIndex, targetIndex);
     }
@@ -121,20 +132,24 @@ public class CSEngine implements Serializable {
         }
     }
 
-    public void removeConnection(String sourceNodeID, String targetNodeID) throws IllegalArgumentException {
-        int sourceIndex = circuit.indexOf(sourceNodeID);
-        int targetIndex = circuit.indexOf(targetNodeID);
-        
-        if(sourceIndex == -1)
-            throw new IllegalArgumentException(sourceNodeID + " does not exist in this circuit");
-        if(targetIndex == -1)
-            throw new IllegalArgumentException(targetNodeID + " does not exist in this circuit");
+    public void removeConnection(int sourceIndex, int targetIndex) throws IllegalArgumentException {
+        CSNode sourceNode;
+        CSNode targetNode;
+
+        try {
+            sourceNode = circuit.getNode(sourceIndex);
+        } catch(IndexOutOfBoundsException ioobe) {
+            throw new IllegalArgumentException(sourceIndex + " is an invalid index");
+        }
+
+        try {
+            targetNode = circuit.getNode(targetIndex);
+        } catch(IndexOutOfBoundsException ioobe) {
+            throw new IllegalArgumentException(targetIndex + " is an invalid index");
+        }
         
         if(!(circuit.containsEdge(sourceIndex, targetIndex)))
             throw new IllegalArgumentException("The specified connection does not exist");
-
-        CSNode sourceNode = circuit.getNode(sourceIndex);
-        CSNode targetNode = circuit.getNode(targetIndex);
 
         if(sourceNode instanceof FlipFlop)
             throw new IllegalArgumentException("Please refer to this flip flop's output nodes instead");
@@ -148,7 +163,7 @@ public class CSEngine implements Serializable {
             // no need to sort indecesToRemove list since inverters cannot point to other inverters,
             // thus only the inverter's index will be in the list as the first element
             circuit.removeNode(indecesToRemove.get(0));
-            invertedNodes.remove(sourceNodeID);
+            invertedNodes.remove(sourceNode.getName());
         } else { // only need to update input node reference to target node
             VariableInput varInputNode = (VariableInput)targetNode;
             varInputNode.removeInputNode(circuit.getNode(sourceIndex));
@@ -187,6 +202,9 @@ public class CSEngine implements Serializable {
             Inverter inverterNode = (Inverter)node;
             invertedNodes.remove(inverterNode.getInputNode().getName());
         }
+        if(node instanceof InputVariableNode)
+            inputNodeNames.remove(node.getName());
+
 
         CSNode neighborNode;
         VariableInput varInputNode;
@@ -324,7 +342,12 @@ public class CSEngine implements Serializable {
     }
 
     public String[] getInputNodeNames() {
-        return (String[])inputNodeNames.toArray();
+        String[] result = new String[inputNodeNames.size()];
+
+        for(int i = 0; i < inputNodeNames.size(); i++)
+            result[i] = inputNodeNames.get(i);
+
+        return result;
     }
 
     public int getCircuitSize() {
@@ -372,5 +395,45 @@ public class CSEngine implements Serializable {
         status[6] = connections;
 
         return status;
+    }
+
+    public String[] getCircuitConnectionStatus() {
+        String[] result = new String[circuit.getSize()];
+        String adjListString;
+        LinkedList<Integer> temp;
+
+        for(int i = 0; i < circuit.getSize(); i++) {
+            temp = circuit.getAdjList(i);
+            adjListString = (i + 1) + " -> [";
+            if(!temp.isEmpty()) {
+                for(int j = 0; j < temp.size() - 1; j++)
+                    adjListString += (temp.get(j) + 1) + ", ";
+                adjListString += (temp.getLast() + 1) + "]";
+            } else
+                adjListString += "]";
+
+            
+            result[i] = adjListString;
+        }
+
+        return result;
+    }
+
+    public String[] getCircuitInputSeqStatus() {
+        String[] result = new String[inputNodeNames.size()];
+        String inputNodeName;
+        String nodeSeq;
+        InputVariableNode currentNode;
+        for(int i = 0; i < inputNodeNames.size(); i++) {
+            inputNodeName = inputNodeNames.get(i);
+            currentNode = (InputVariableNode)circuit.getNode(inputNodeName);
+            nodeSeq = currentNode.getInputSeq();
+            if(nodeSeq.equals("null"))
+                result[i] = String.format("%d. %-15s %s", (i + 1), inputNodeName, "[]");
+            else
+                result[i] = String.format("%d %-15s %s", (i + 1), inputNodeName, nodeSeq);
+        }
+
+        return result;
     }
 }

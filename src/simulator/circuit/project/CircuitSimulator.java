@@ -61,11 +61,11 @@ public class CircuitSimulator {
             files = CSFileIO.getSaveDir().listFiles();
             if(files != null) {
                 System.out.printf("\n%-20s %s\n", "Saved Circuits", "Last Modified");
-                System.out.println("-------------------- --------------------------");
+                System.out.println("-------------------- ------------------------------");
 
                 for(File file : files)
                     System.out.printf("%-20s %s\n", file.getName(), new Date(file.lastModified()).toString());
-                System.out.println("-------------------- --------------------------");
+                System.out.println("-------------------- ------------------------------");
                 System.out.println();
             }
             
@@ -192,8 +192,8 @@ public class CircuitSimulator {
             System.out.println("You have opted to edit your circuit and haven't saved since then.\n" +
                                 "Any unsaved changes will be lost.\n");
 
-            userInput = CSUserInterface.getUserIntInput("Enter 1 to exit without saving, or 2 to save before exiting: ", 2, inputSource);
-            if(userInput == 2)
+            userInput = CSUserInterface.getUserIntInput("Enter 1 to save before exiting, or 2 to exit without saving: ", 2, inputSource);
+            if(userInput == 1)
                 saveCircuit();
         }
 

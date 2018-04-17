@@ -21,4 +21,5 @@ Progress Notes/To-do list:
 + implement text-based UI
   + implement testing circuit in CircuitTester class
   + finish implementing CircuitEditor class
-+ redesign how to output circuit node names in CS > Main Menu > Edit Nodes > Add Node
++ test output circuit node names in editConnections and editNodes in CircuitEditor
++ finish implementing getUserInputSeq method in CSUserInterface

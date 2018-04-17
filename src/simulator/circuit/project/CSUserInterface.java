@@ -62,6 +62,22 @@ public class CSUserInterface {
         } while(true);
     }
 
+    public static int[] getUserInputSeq(String prompt, Scanner inputSource) {
+        StringTokenizer tokenizer;
+        int count;
+        boolean done = false;
+
+        do {
+            System.out.print(prompt);
+            try {
+                tokenizer = new StringTokenizer(inputSource.nextLine());
+                // TODO: design a way to get sequence of 0s and 1s from user, ignore anything not a 1 or 0
+            } catch(NoSuchElementException nsee) {
+                System.err.println("Please enter an input.");
+            }
+        } while(!done);
+    }
+
     public static int getUserIntInput(String prompt, int upperBound, Scanner inputSource) {
         StringTokenizer tokenizer;
         int userInput;
@@ -82,6 +98,8 @@ public class CSUserInterface {
             } catch(NoSuchElementException nsee) {
                 System.err.println("Please enter an input.");
                 continue;
+            } catch(IllegalArgumentException iae) {
+                System.err.println(iae.getMessage());
             } catch(Exception e) {
                 System.err.println("Unknown error. Please try again.");
                 continue;

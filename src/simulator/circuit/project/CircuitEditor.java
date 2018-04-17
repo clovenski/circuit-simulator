@@ -73,11 +73,11 @@ public class CircuitEditor {
 
         do {
             System.out.println("\nCS > Main Menu > Circuit Editor > Edit Nodes");
-            System.out.printf("%17s nodes:\n", circuitName);
+            System.out.printf("%17s nodes:\n\n", circuitName);
             nodeNames = engine.getCircuitNodeNames();
             for(int i = 1; i <= nodeNames.length; i++) {
                 System.out.print(i + ". " + nodeNames[i - 1] + "  ");
-                if(i % 5 == 0)
+                if(i % 5 == 0 && i != nodeNames.length - 1) // TODO: test this
                     System.out.println();
             }
 
@@ -147,7 +147,7 @@ public class CircuitEditor {
 
     private void removeNode() {
         String targetNode;
-        System.out.println("\nCS > Main Menu > Circuit Editor > Edit Nodes > Remove Node");
+
         targetNode = CSUserInterface.getUserStringInput("Name of the node to remove: ", inputSource);
         try {
             engine.removeNode(targetNode);
@@ -173,18 +173,96 @@ public class CircuitEditor {
     }
 
     private void editConnections() {
-        System.out.println("CS > Main Menu > Circuit Editor > Edit Connections");
+        int userInput;
+        String[] nodeNames;
+        String[] circuitConnections;
+        ArrayList<String> options = new ArrayList<String>();
+        options.add("Add a connection");
+        options.add("Remove a connection");
+        options.add("Return");
+
+        do {
+            System.out.println("\nCS > Main Menu > Circuit Editor > Edit Connections");
+            System.out.printf("%17s connections:\n\n", circuitName);
+
+            nodeNames = engine.getCircuitNodeNames();
+            for(int i = 1; i <= nodeNames.length; i++) {
+                System.out.print(i + ". " + nodeNames[i - 1] + "  ");
+                if(i % 5 == 0 && i != nodeNames.length - 1) // TODO: test this
+                    System.out.println();
+            }
+
+            System.out.println("\n");
+
+            circuitConnections = engine.getCircuitConnectionStatus();
+            for(String connectionStatus : circuitConnections)
+                System.out.println(connectionStatus);
+
+            System.out.println();
+            CSUserInterface.displayOptions(options);
+            userInput = CSUserInterface.getUserOptInput(options, inputSource);
+
+            switch(userInput) {
+                case 1:     addConnection();
+                            break;
+                case 2:     removeConnection();
+                            break;
+                case 3:     return;
+            }
+        } while(true);
     }
 
     private void addConnection() {
-        System.out.println("CS > Main Menu > Circuit Editor > Edit Connections > Add Connection");
+        int sourceNodeIndex;
+        int targetNodeIndex;
+        int circuitSize = engine.getCircuitSize();
+        String promptSource = "Enter the number of the node to be the source of this connection: ";
+        String promptTarget = "Enter the number of the node to be the target of this connection: ";
+
+        sourceNodeIndex = CSUserInterface.getUserIntInput(promptSource, circuitSize, inputSource) - 1;
+        targetNodeIndex = CSUserInterface.getUserIntInput(promptTarget, circuitSize, inputSource) - 1;
+
+        try {
+            engine.addConnection(sourceNodeIndex, targetNodeIndex);
+            System.out.println("\nSuccessfully added connection from " + sourceNodeIndex + " to " + targetNodeIndex);
+        } catch(IllegalArgumentException iae) {
+            System.err.println(iae.getMessage());
+        }
     }
 
     private void removeConnection() {
-        System.out.println("CS > Main Menu > Circuit Editor > Edit Connections > Remove Connection");
+        int sourceNodeIndex;
+        int targetNodeIndex;
+        int circuitSize = engine.getCircuitSize();
+        String promptSource = "Enter the number of the node that is the source of this connection: ";
+        String promptTarget = "Enter the number of the node that is the target of this connection: ";
+
+        sourceNodeIndex = CSUserInterface.getUserIntInput(promptSource, circuitSize, inputSource) - 1;
+        targetNodeIndex = CSUserInterface.getUserIntInput(promptTarget, circuitSize, inputSource) - 1;
+
+        try {
+            engine.removeConnection(sourceNodeIndex, targetNodeIndex);
+            System.out.println("\nSuccessfully removed connection from " + sourceNodeIndex + " to " + targetNodeIndex);
+        } catch(IllegalArgumentException iae) {
+            System.err.println(iae.getMessage());
+        }
     }
 
     private void setInputSeq() {
-        System.out.println("CS > Main Menu > Circuit Editor > Set Input Sequence");
+        int inputNodeIndex;
+        String prompt = "Enter the number of the node to set a sequence to: ";
+        String[] circuitInputSeqStatus = engine.getCircuitInputSeqStatus();
+
+        System.out.println("\nCS > Main Menu > Circuit Editor > Set Input Sequence");
+        
+        if(circuitInputSeqStatus.length != 0) {
+            for(String status : circuitInputSeqStatus)
+                System.out.println(status);
+
+            System.out.println();
+            inputNodeIndex = CSUserInterface.getUserIntInput(prompt, circuitInputSeqStatus.length, inputSource) - 1;
+
+            // TODO: get sequence from user, set into circuit
+        }
     }
 }

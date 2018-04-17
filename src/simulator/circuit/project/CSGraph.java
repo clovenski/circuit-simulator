@@ -43,7 +43,7 @@ public class CSGraph implements Serializable {
         }
     }
 
-    public CSNode getNode(int nodeIndex) {
+    public CSNode getNode(int nodeIndex) throws IndexOutOfBoundsException {
         return nodes.get(nodeIndex);
     }
 
