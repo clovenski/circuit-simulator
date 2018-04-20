@@ -15,11 +15,13 @@ public class CSEngine implements Serializable {
     private CSGraph circuit;
     private ArrayList<String> inputNodeNames;
     private ArrayList<String> invertedNodes;
+    private ArrayList<CSNode> trackedNodes;
 
     public CSEngine() {
         circuit = new CSGraph();
         inputNodeNames = new ArrayList<String>();
         invertedNodes = new ArrayList<String>();
+        trackedNodes = new ArrayList<CSNode>();
     }
 
     public void addInputNode(String nodeID) throws IllegalArgumentException {
@@ -224,8 +226,10 @@ public class CSEngine implements Serializable {
         }
 
         Collections.sort(indecesToRemove);
-        for(int i = indecesToRemove.size() - 1; i >= 0; i--)
+        for(int i = indecesToRemove.size() - 1; i >= 0; i--) {
             circuit.removeNode(indecesToRemove.get(i));
+            trackedNodes.remove(circuit.getNode(indecesToRemove.get(i)));
+        }
     }
 
     private void removeDFFNode(int nodeIndex) {
@@ -280,31 +284,65 @@ public class CSEngine implements Serializable {
         node.setInputSeq(newSeq);
     }
 
-    public String[] getNodeNames() {
-        String[] nodeNames = new String[circuit.getSize()];
+    public String[] getTrackedNodeNames() {
+        String[] nodeNames = new String[trackedNodes.size()];
 
-        for(int i = 0; i < circuit.getSize(); i++)
-            nodeNames[i] = circuit.getNode(i).getName();
+        for(int i = 0; i < trackedNodes.size(); i++)
+            nodeNames[i] = trackedNodes.get(i).getName();
 
         return nodeNames;
     }
 
-    public int[] getCurrentCircuitState() {
-        int[] nodeValues = new int[circuit.getSize()];
+    public void trackNode(int nodeIndex) {
+        if(nodeIndex < 0 || nodeIndex >= circuit.getSize())
+            throw new IllegalArgumentException(nodeIndex + " is an invalid index");
+        else if(trackedNodes.contains(circuit.getNode(nodeIndex)))
+            throw new IllegalArgumentException("That node is already being tracked");
+        else
+            trackedNodes.add(circuit.getNode(nodeIndex));
+    }
 
-        for(int i = 0; i < circuit.getSize(); i++)
-            nodeValues[i] = circuit.getNode(i).getValue();
+    public void trackAllNodes() {
+        // number of nodes that are untracked
+        int untrackedNodes = circuit.getSize() - trackedNodes.size();
+        CSNode node;
+
+        while(untrackedNodes != 0)
+            for(int i = 0; i < circuit.getSize(); i++) {
+                node = circuit.getNode(i);
+                if(!trackedNodes.contains(node)) {
+                    trackedNodes.add(node);
+                    untrackedNodes--;
+                }
+            }
+    }
+
+    // nodeIndex refers to node's index in trackedNodes ArrayList
+    public void untrackNode(int nodeIndex) {
+        trackedNodes.remove(nodeIndex);
+    }
+
+    public void untrackAllNodes() {
+        while(trackedNodes.size() != 0)
+            trackedNodes.remove(trackedNodes.size() - 1);
+    }
+
+    public int[] getCurrentCircuitState() {
+        int[] nodeValues = new int[trackedNodes.size()];
+
+        for(int i = 0; i < trackedNodes.size(); i++)
+            nodeValues[i] = trackedNodes.get(i).getValue();
 
         return nodeValues;
     }
 
     public int[] getNextCircuitState() {
-        int[] nodeValues = new int[circuit.getSize()];
+        int[] nodeValues = new int[trackedNodes.size()];
 
         updateCircuit();
 
-        for(int i = 0; i < circuit.getSize(); i ++)
-            nodeValues[i] = circuit.getNode(i).getValue();
+        for(int i = 0; i < trackedNodes.size(); i ++)
+            nodeValues[i] = trackedNodes.get(i).getValue();
 
         return nodeValues;
 
@@ -431,7 +469,7 @@ public class CSEngine implements Serializable {
             if(nodeSeq.equals("null"))
                 result[i] = String.format("%d. %-15s %s", (i + 1), inputNodeName, "[]");
             else
-                result[i] = String.format("%d %-15s %s", (i + 1), inputNodeName, nodeSeq);
+                result[i] = String.format("%d. %-15s %s", (i + 1), inputNodeName, nodeSeq);
         }
 
         return result;

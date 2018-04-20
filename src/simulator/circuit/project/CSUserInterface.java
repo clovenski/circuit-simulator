@@ -63,19 +63,33 @@ public class CSUserInterface {
     }
 
     public static int[] getUserInputSeq(String prompt, Scanner inputSource) {
+        ArrayList<Integer> sequence = new ArrayList<Integer>();
+        String token;
         StringTokenizer tokenizer;
-        int count;
         boolean done = false;
+        int[] result;
 
         do {
             System.out.print(prompt);
             try {
                 tokenizer = new StringTokenizer(inputSource.nextLine());
-                // TODO: design a way to get sequence of 0s and 1s from user, ignore anything not a 1 or 0
+                while(tokenizer.hasMoreTokens()) {
+                    token = tokenizer.nextToken();
+                    if(token.equals("1") || token.equals("0"))
+                        sequence.add(Integer.parseInt(token));
+                }
             } catch(NoSuchElementException nsee) {
                 System.err.println("Please enter an input.");
+            } catch(Exception e) {
+                System.err.println("Unknown error. Please try again.");
             }
-        } while(!done);
+        } while(sequence.size() == 0);
+
+        result = new int[sequence.size()];
+        for(int i = 0; i < sequence.size(); i++)
+            result[i] = sequence.get(i);
+
+        return result;
     }
 
     public static int getUserIntInput(String prompt, int upperBound, Scanner inputSource) {
