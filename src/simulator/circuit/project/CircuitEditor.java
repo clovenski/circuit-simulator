@@ -224,7 +224,7 @@ public class CircuitEditor {
 
         try {
             engine.addConnection(sourceNodeIndex, targetNodeIndex);
-            System.out.println("\nSuccessfully added connection from " + sourceNodeIndex + " to " + targetNodeIndex);
+            System.out.println("\nSuccessfully added connection from " + (sourceNodeIndex + 1) + " to " + (targetNodeIndex + 1));
         } catch(IllegalArgumentException iae) {
             System.err.println(iae.getMessage());
         }
@@ -242,7 +242,7 @@ public class CircuitEditor {
 
         try {
             engine.removeConnection(sourceNodeIndex, targetNodeIndex);
-            System.out.println("\nSuccessfully removed connection from " + sourceNodeIndex + " to " + targetNodeIndex);
+            System.out.println("\nSuccessfully removed connection from " + (sourceNodeIndex + 1) + " to " + (targetNodeIndex + 1));
         } catch(IllegalArgumentException iae) {
             System.err.println(iae.getMessage());
         }

@@ -345,6 +345,7 @@ public class CSEngine {
         trackedNodes.clear();
     }
 
+    // may not be needed
     public int[] getCurrentCircuitState() {
         int[] nodeValues = new int[trackedNodes.size()];
 
@@ -352,6 +353,21 @@ public class CSEngine {
             nodeValues[i] = trackedNodes.get(i).getValue();
 
         return nodeValues;
+    }
+
+    public int getLongestSequenceLength() {
+        int longestLength = 0;
+        int compareLength;
+        InputVariableNode inputNode;
+
+        for(String inputNodeName : inputNodeNames) {
+            inputNode = (InputVariableNode)circuit.getNode(inputNodeName);
+            compareLength = inputNode.getInputSeqLength();
+            if(longestLength < compareLength)
+                longestLength = compareLength;
+        }
+
+        return longestLength;
     }
 
     public int[] getNextCircuitState() {
@@ -460,7 +476,7 @@ public class CSEngine {
 
         for(int i = 0; i < circuit.getSize(); i++) {
             temp = circuit.getAdjList(i);
-            adjListString = (i + 1) + " -> [";
+            adjListString = String.format("%2d -> [", (i + 1));
             if(!temp.isEmpty()) {
                 for(int j = 0; j < temp.size() - 1; j++)
                     adjListString += (temp.get(j) + 1) + ", ";

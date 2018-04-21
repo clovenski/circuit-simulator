@@ -27,6 +27,13 @@ public class InputVariableNode extends CSNode {
         return Arrays.toString(inputSeq);
     }
     
+    public int getInputSeqLength() {
+        if(inputSeq == null)
+            return 0;
+        else
+            return inputSeq.length;
+    }
+
     public void resetValue() {
         value = 0;
         currentIndex = 0;

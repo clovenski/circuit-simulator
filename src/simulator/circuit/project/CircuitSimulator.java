@@ -98,7 +98,23 @@ public class CircuitSimulator {
     }
 
     private void printCircuitInfo() {
+        int[] circuitStatus = engine.getCircuitStatus();
+        int index = 0;
+        // circuit is ready to test if a sequence exists in the circuit
+        boolean testReady = circuitStatus[1] > 0;
 
+        // print general info of circuit
+        System.out.printf("%23s: %s\n", "Circuit name", circuitName);
+        System.out.printf("%23s: %d\n", "Number of nodes", engine.getCircuitSize());
+        System.out.printf("%23s: %s\n", "Ready to test", (testReady ? "Yes" : "No"));
+        // print number of nodes for each type of node
+        System.out.printf("%-15s : %d\n", "Input Nodes", circuitStatus[index++]);
+        System.out.printf("%-15s : %d\n", "Sequences", circuitStatus[index++]);
+        System.out.printf("%-15s : %d\n", "Output Nodes", circuitStatus[index++]);
+        System.out.printf("%-15s : %d\n", "Flip Flops", circuitStatus[index++]);
+        System.out.printf("%-15s : %d\n", "Gates", circuitStatus[index++]);
+        System.out.printf("%-15s : %d\n", "Inverters", circuitStatus[index++]);
+        System.out.printf("%-15s : %d\n", "Connections", circuitStatus[index++]);
     }
 
     private void editCircuit() {
@@ -107,7 +123,8 @@ public class CircuitSimulator {
     }
 
     private void testCircuit() {
-
+        CircuitTester tester = new CircuitTester(engine, circuitName, inputSource);
+        tester.start();
     }
 
     private void saveCircuit() {
@@ -210,7 +227,6 @@ public class CircuitSimulator {
 
     public static void main(String[] args) {
         CircuitSimulator program = new CircuitSimulator();
-        // program.testProgram();
         program.start();
         program.exit();
     }

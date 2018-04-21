@@ -66,7 +66,6 @@ public class CSUserInterface {
         ArrayList<Integer> sequence = new ArrayList<Integer>();
         String token;
         StringTokenizer tokenizer;
-        boolean done = false;
         int[] result;
 
         do {
