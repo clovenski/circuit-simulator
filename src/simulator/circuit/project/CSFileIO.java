@@ -12,7 +12,7 @@ public class CSFileIO {
     private static final String fileSeparator = System.getProperty("file.separator");
     private static final String saveDirName = "cs-saves";
 
-    public static void writeSaveFile(CSEngine engine, String fileName) throws FileNotFoundException, IOException, ClassNotFoundException {
+    public static void writeSaveFile(CSGraph circuit, String fileName) throws FileNotFoundException, IOException, ClassNotFoundException {
         FileOutputStream fos;
         ObjectOutputStream oos;
 
@@ -23,27 +23,27 @@ public class CSFileIO {
         fos = new FileOutputStream(dir.getName() + fileSeparator + fileName);
         oos = new ObjectOutputStream(fos);
 
-        oos.writeObject(engine);
+        oos.writeObject(circuit);
         oos.close();
         fos.close();        
     }
 
-    public static CSEngine readSaveFile(String fileName) throws FileNotFoundException, IOException, ClassNotFoundException {
+    public static CSGraph readSaveFile(String fileName) throws FileNotFoundException, IOException, ClassNotFoundException, ClassCastException {
         FileInputStream fis;
         ObjectInputStream ois;
-        CSEngine circuitEngine;
+        CSGraph circuit;
 
         File file = new File(saveDirName + fileSeparator + fileName);
 
         fis = new FileInputStream(file);
         ois = new ObjectInputStream(fis);
 
-        circuitEngine = (CSEngine)ois.readObject();
+        circuit = (CSGraph)ois.readObject();
 
         ois.close();
         fis.close();
 
-        return circuitEngine;
+        return circuit;
     }
 
     public static File getSaveDir() {

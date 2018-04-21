@@ -22,10 +22,15 @@ public class CircuitSimulator {
 
     public CircuitSimulator(String fileName) {
         try {
-            engine = CSFileIO.readSaveFile(fileName);
+            engine.loadCircuit(fileName);
             circuitName = "fileName";
         } catch(FileNotFoundException fnfe) {
             System.err.println("Error: could not find saved circuit named " + fileName + ".");
+            System.err.println("Creating a new circuit . . .");
+            engine = new CSEngine();
+            circuitName = "new-circuit";
+        } catch(ClassCastException cce) {
+            System.err.println("Error: could not recognize this file");
             System.err.println("Creating a new circuit . . .");
             engine = new CSEngine();
             circuitName = "new-circuit";
@@ -115,11 +120,12 @@ public class CircuitSimulator {
 
         fileName = CSUserInterface.getUserStringInput("Save as: ", inputSource);
 
-        for(int i = 0; i < files.length; i++) 
-            if(files[0].getName().equals(fileName)) {
-                overwriting = true;
-                break;
-            }
+        if(files != null)
+            for(int i = 0; i < files.length; i++) 
+                if(files[0].getName().equals(fileName)) {
+                    overwriting = true;
+                    break;
+                }
 
         if(overwriting) {
             System.out.println(fileName + " already exists. Would you like to overwrite it?");
@@ -127,8 +133,9 @@ public class CircuitSimulator {
 
             if(userInput == 1) {
                 try {
-                    CSFileIO.writeSaveFile(engine, fileName);
+                    engine.saveCircuit(fileName);
                     circuitEdited = false;
+                    System.out.println("\nSuccessfully saved the circuit");
                 } catch(Exception e) {
                     System.err.println("Unknown error: " + e.getMessage());
                 }
@@ -136,8 +143,9 @@ public class CircuitSimulator {
 
         } else { // fileName does not exist in save folder, okay to save
             try {
-                CSFileIO.writeSaveFile(engine, fileName);
+                engine.saveCircuit(fileName);
                 circuitEdited = false;
+                System.out.println("\nSuccessfully saved the circuit");
             } catch(Exception e) {
                 System.err.println("Unknown error: " + e.getMessage());
             }
@@ -174,7 +182,7 @@ public class CircuitSimulator {
 
         fileName = options.get(userInput - 1);
         try {
-            engine = CSFileIO.readSaveFile(fileName);
+            engine.loadCircuit(fileName);
             circuitName = fileName;
             circuitEdited = false;
             System.out.println("\nSuccessfully loaded file " + fileName);

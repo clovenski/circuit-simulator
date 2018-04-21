@@ -2,7 +2,6 @@ package simulator.circuit.project;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -10,8 +9,7 @@ import java.util.StringTokenizer;
 
 import simulator.circuit.project.CSGraph.IllegalCircuitStateException;
 
-public class CSEngine implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class CSEngine {
     private CSGraph circuit;
     private ArrayList<String> inputNodeNames;
     private ArrayList<String> invertedNodes;
@@ -294,12 +292,18 @@ public class CSEngine implements Serializable {
     }
 
     public void trackNode(int nodeIndex) throws IllegalArgumentException {
+        CSNode node;
+
         if(nodeIndex < 0 || nodeIndex >= circuit.getSize())
             throw new IllegalArgumentException(nodeIndex + " is an invalid index");
         else if(trackedNodes.contains(circuit.getNode(nodeIndex)))
             throw new IllegalArgumentException("That node is already being tracked");
-        else
-            trackedNodes.add(circuit.getNode(nodeIndex));
+        else {
+            node = circuit.getNode(nodeIndex);
+            node.setTrackNum(trackedNodes.size() + 1);
+            trackedNodes.add(node);
+        }
+            
     }
 
     public void trackAllNodes() {
@@ -310,7 +314,8 @@ public class CSEngine implements Serializable {
         while(untrackedNodes != 0)
             for(int i = 0; i < circuit.getSize(); i++) {
                 node = circuit.getNode(i);
-                if(!trackedNodes.contains(node)) {
+                if(node.getTrackNum() == 0) {
+                    node.setTrackNum(trackedNodes.size() + 1);
                     trackedNodes.add(node);
                     untrackedNodes--;
                 }
@@ -318,12 +323,26 @@ public class CSEngine implements Serializable {
     }
 
     // nodeIndex refers to node's index in trackedNodes ArrayList
-    public void untrackNode(int nodeIndex) {
+    public void untrackNode(int nodeIndex) throws IllegalArgumentException {
+        if(nodeIndex < 0 || nodeIndex >= trackedNodes.size())
+            throw new IllegalArgumentException(nodeIndex + " is an invalid index");
+
+        // reset the target node's track number to zero
+        trackedNodes.get(nodeIndex).resetTrackNum();
+
+        // for each node after the target node to untrack, subtract one from their track number
+        // in order for it to correspond to its spot in the array
+        for(int i = nodeIndex + 1; i < trackedNodes.size(); i++)
+            trackedNodes.get(i).setTrackNum(i - 1);
+
         trackedNodes.remove(nodeIndex);
     }
 
     public void untrackAllNodes() {
-            trackedNodes.clear();
+        for(CSNode node : trackedNodes)
+            node.resetTrackNum();
+
+        trackedNodes.clear();
     }
 
     public int[] getCurrentCircuitState() {
@@ -472,5 +491,37 @@ public class CSEngine implements Serializable {
         }
 
         return result;
+    }
+
+    public void saveCircuit(String fileName) throws FileNotFoundException, IOException, ClassNotFoundException {
+        CSFileIO.writeSaveFile(circuit, fileName);
+    }
+
+    public void loadCircuit(String fileName) throws FileNotFoundException, IOException, ClassNotFoundException, ClassCastException {
+        CSNode node;
+        Inverter inverterNode;
+
+        circuit = CSFileIO.readSaveFile(fileName);
+
+        inputNodeNames.clear();
+        invertedNodes.clear();
+        trackedNodes.clear();
+
+        for(int i = 0; i < circuit.getSize(); i++) {
+            node = circuit.getNode(i);
+
+            if(node instanceof InputVariableNode)
+                inputNodeNames.add(node.getName());
+            
+            if(node instanceof Inverter) {
+                inverterNode = (Inverter)node;
+                invertedNodes.add(inverterNode.getInputNode().getName());
+            }
+
+            if(node.getTrackNum() > 0)
+                trackedNodes.add(node);
+        }
+
+        trackedNodes.sort(new CSNodeTrackNumComparator());
     }
 }

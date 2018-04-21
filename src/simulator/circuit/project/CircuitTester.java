@@ -78,4 +78,8 @@ public class CircuitTester {
     private void untrackNode() {
 
     }
+
+    private void printCircuitTest() {
+        
+    }
 }

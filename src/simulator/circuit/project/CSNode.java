@@ -7,11 +7,13 @@ import java.io.Serializable;
 public abstract class CSNode implements Serializable {
     protected int value;
     protected String name;
+    protected int trackNum;
     private static final long serialVersionUID = 1L;
     
     public CSNode(String name) {
         value = 0;
         this.name = name;
+        trackNum = 0;
     }
 
     public void setName(String newName) {
@@ -28,6 +30,18 @@ public abstract class CSNode implements Serializable {
 
     public void resetValue() {
         value = 0;
+    }
+
+    public void setTrackNum(int trackNum) {
+        this.trackNum = trackNum;
+    }
+
+    public int getTrackNum() {
+        return trackNum;
+    }
+
+    public void resetTrackNum() {
+        trackNum = 0;
     }
 
     public abstract void updateValue();
