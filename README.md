@@ -22,3 +22,4 @@ Progress Notes/To-do list:
   + implement testing circuit in CircuitTester class
 + testing the circuit can most likely be dump data of the states of the nodes for all clock cycles
 + design a way to demonstrate a circuit that solves the seven segment display problem
++ considering reverting save object to be CSGraph instead of CSEngine

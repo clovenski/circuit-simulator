@@ -293,7 +293,7 @@ public class CSEngine implements Serializable {
         return nodeNames;
     }
 
-    public void trackNode(int nodeIndex) {
+    public void trackNode(int nodeIndex) throws IllegalArgumentException {
         if(nodeIndex < 0 || nodeIndex >= circuit.getSize())
             throw new IllegalArgumentException(nodeIndex + " is an invalid index");
         else if(trackedNodes.contains(circuit.getNode(nodeIndex)))
@@ -323,8 +323,7 @@ public class CSEngine implements Serializable {
     }
 
     public void untrackAllNodes() {
-        while(trackedNodes.size() != 0)
-            trackedNodes.remove(trackedNodes.size() - 1);
+            trackedNodes.clear();
     }
 
     public int[] getCurrentCircuitState() {
