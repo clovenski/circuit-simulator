@@ -43,7 +43,7 @@ public class CSExample extends JPanel implements ActionListener {
         HorizontalSegment seg1 = new HorizontalSegment((OutputVariableNode)circuit.getNode("b"));
         seg1.setSize(90, 20);
         seg1.setLocation(150, 100);
-        add(seg);
+        add(seg1);
 
         HorizontalSegment seg2 = new HorizontalSegment((OutputVariableNode)circuit.getNode("c"));
         seg2.setSize(90, 20);
