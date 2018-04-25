@@ -98,7 +98,7 @@ public class CircuitTester {
 
         System.out.println("\n");
 
-        nodeIndex = CSUserInterface.getUserIntInput(prompt, nodeNames.length, inputSource);
+        nodeIndex = CSUserInterface.getUserIntInput(prompt, nodeNames.length, inputSource) - 1;
         try {
             engine.trackNode(nodeIndex);
             System.out.println("\nSuccessfully tracked the node");

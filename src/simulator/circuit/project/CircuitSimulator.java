@@ -3,7 +3,6 @@ package simulator.circuit.project;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays; // imported for testing, remove later
 import java.util.Date;
 import java.util.Scanner;
 
@@ -153,6 +152,7 @@ public class CircuitSimulator {
                     engine.saveCircuit(fileName);
                     circuitEdited = false;
                     System.out.println("\nSuccessfully saved the circuit");
+                    circuitName = fileName;
                 } catch(Exception e) {
                     System.err.println("Unknown error: " + e.getMessage());
                 }
@@ -163,6 +163,7 @@ public class CircuitSimulator {
                 engine.saveCircuit(fileName);
                 circuitEdited = false;
                 System.out.println("\nSuccessfully saved the circuit");
+                circuitName = fileName;
             } catch(Exception e) {
                 System.err.println("Unknown error: " + e.getMessage());
             }

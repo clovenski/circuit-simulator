@@ -22,6 +22,34 @@ public class CSEngine {
         trackedNodes = new ArrayList<CSNode>();
     }
 
+    public CSEngine(CSGraph circuit) {
+        CSNode node;
+        Inverter inverterNode;
+
+        this.circuit = circuit;
+
+        inputNodeNames = new ArrayList<String>();
+        invertedNodes = new ArrayList<String>();
+        trackedNodes = new ArrayList<CSNode>();
+
+        for(int i = 0; i < circuit.getSize(); i++) {
+            node = circuit.getNode(i);
+
+            if(node instanceof InputVariableNode)
+                inputNodeNames.add(node.getName());
+            
+            if(node instanceof Inverter) {
+                inverterNode = (Inverter)node;
+                invertedNodes.add(inverterNode.getInputNode().getName());
+            }
+
+            if(node.getTrackNum() > 0)
+                trackedNodes.add(node);
+        }
+
+        trackedNodes.sort(new CSNodeTrackNumComparator());
+    }
+
     public void addInputNode(String nodeID) throws IllegalArgumentException {
         circuit.addNode(new InputVariableNode(nodeID));
         inputNodeNames.add(nodeID);
@@ -225,8 +253,8 @@ public class CSEngine {
 
         Collections.sort(indecesToRemove);
         for(int i = indecesToRemove.size() - 1; i >= 0; i--) {
-            circuit.removeNode(indecesToRemove.get(i));
             trackedNodes.remove(circuit.getNode(indecesToRemove.get(i)));
+            circuit.removeNode(indecesToRemove.get(i));
         }
     }
 

@@ -11,5 +11,7 @@ Feature ideas:
 Progress Notes/To-do list:
 
 + clean up UI
-+ tracking more than 13 nodes causes misalignment in printing test results, may vary from user to user; consider users with small screen, small terminal
++ design a way to minimize the separation of columns in printing the test results according to longest node name
++ for printing current connections, have output variables print [output] instead of [] since they cannot connect to anything
++ clean up example
 + design a way to demonstrate a circuit that solves the seven segment display problem
