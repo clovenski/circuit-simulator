@@ -154,7 +154,7 @@ public class CircuitSimulator {
                     System.out.println("\nSuccessfully saved the circuit");
                     circuitName = fileName;
                 } catch(Exception e) {
-                    System.err.println("Unknown error: " + e.getMessage());
+                    System.err.println("\nUnknown error: " + e.getMessage());
                 }
             }
 
@@ -165,7 +165,7 @@ public class CircuitSimulator {
                 System.out.println("\nSuccessfully saved the circuit");
                 circuitName = fileName;
             } catch(Exception e) {
-                System.err.println("Unknown error: " + e.getMessage());
+                System.err.println("\nUnknown error: " + e.getMessage());
             }
         }
     }

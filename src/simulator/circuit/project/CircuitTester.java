@@ -84,7 +84,7 @@ public class CircuitTester {
         String[] nodeNames = engine.getCircuitNodeNames();
 
         if(nodeNames.length == 0) {
-            System.out.println("There are no nodes in the circuit to track");
+            System.out.println("\nThere are no nodes in the circuit to track");
             return;
         }
 
@@ -105,7 +105,7 @@ public class CircuitTester {
         } catch(IllegalArgumentException iae) {
             System.err.println(iae.getMessage());
         } catch(Exception e) {
-            System.err.println("Unknown error: " + e.getMessage());
+            System.err.println("\nUnknown error: " + e.getMessage());
         }
     }
 
@@ -115,7 +115,7 @@ public class CircuitTester {
         String[] trackedNodes = engine.getTrackedNodeNames();
 
         if(trackedNodes.length == 0) {
-            System.out.println("There are no tracked nodes in this circuit");
+            System.out.println("\nThere are no tracked nodes in this circuit");
             return;
         }
 
@@ -136,7 +136,7 @@ public class CircuitTester {
         } catch(IllegalArgumentException iae) {
             System.err.println(iae.getMessage());
         } catch(Exception e) {
-            System.err.println("Unknown error: " + e.getMessage());
+            System.err.println("\nUnknown error: " + e.getMessage());
         }
     }
 
@@ -147,7 +147,13 @@ public class CircuitTester {
         int testCycles = engine.getLongestSequenceLength();
 
         if(testCycles == 0) {
-            System.out.println("There are no input sequences to test this circuit with");
+            System.out.println("\nThere are no input sequences to test this circuit with");
+            return;
+        }
+
+        // if longest node name length is zero, then there are no tracked nodes
+        if(headerWidth == 0) {
+            System.out.println("\nTrack a node in order to display its values in the test");
             return;
         }
 
