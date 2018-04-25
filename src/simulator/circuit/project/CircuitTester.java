@@ -143,6 +143,7 @@ public class CircuitTester {
     private void printCircuitTest() {
         String[] trackedNodeNames;
         int[] trackedNodeValues;
+        int headerWidth = engine.getLongestNodeNameLength();
         int testCycles = engine.getLongestSequenceLength();
 
         if(testCycles == 0) {
@@ -154,13 +155,13 @@ public class CircuitTester {
 
         trackedNodeNames = engine.getTrackedNodeNames();
         for(String trackedNodeName : trackedNodeNames)
-            System.out.printf("%23s", trackedNodeName);
+            System.out.printf("%" + (headerWidth + 1) + "s", trackedNodeName);
         System.out.println();
         
         for(int i = 0; i < testCycles; i++) {
             trackedNodeValues = engine.getNextCircuitState();
             for(int value : trackedNodeValues)
-                System.out.printf("%23d", value);
+                System.out.printf("%" + (headerWidth + 1) + "d", value);
             System.out.println();
         }
 

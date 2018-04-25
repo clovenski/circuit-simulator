@@ -136,6 +136,9 @@ public class CSEngine {
         CSNode targetNode;
         String targetNodeName;
 
+        if(circuit.contains(newName))
+            throw new IllegalArgumentException(newName + " already exists");
+
         if(nodeIndex < 0 || nodeIndex >= circuit.getSize())
             throw new IllegalArgumentException("The given node index is invalid");
         
@@ -152,6 +155,10 @@ public class CSEngine {
         // rename target node's inverter as well, if it exists
         if(invertedNodes.contains(targetNodeName))
             circuit.getNode(targetNodeName + "-inverter").setName(newName + "-inverter");
+
+        // if renamed an input node, update the inputNodeNames array
+        if(inputNodeNames.remove(targetNodeName))
+            inputNodeNames.add(newName);
         
         // if renamed a flip flop, also need to rename its output nodes
         if(targetNode instanceof FlipFlop) {
@@ -180,7 +187,7 @@ public class CSEngine {
             throw new IllegalArgumentException("The specified connection does not exist");
 
         if(sourceNode instanceof FlipFlop)
-            throw new IllegalArgumentException("Please refer to this flip flop's output nodes instead");
+            throw new IllegalArgumentException("Flip flops cannot exist without their output nodes");
 
         circuit.removeEdge(sourceIndex, targetIndex);
 
@@ -373,7 +380,6 @@ public class CSEngine {
         trackedNodes.clear();
     }
 
-    // may not be needed
     public int[] getCurrentCircuitState() {
         int[] nodeValues = new int[trackedNodes.size()];
 
@@ -396,6 +402,21 @@ public class CSEngine {
         }
 
         return longestLength;
+    }
+
+    public int getLongestNodeNameLength() {
+        int longestNameLength = 0;
+        int compareLength;
+        CSNode node;
+
+        for(int i = 0; i < trackedNodes.size(); i++) {
+            node = trackedNodes.get(i);
+            compareLength = node.getName().length();
+            if(compareLength > longestNameLength)
+                longestNameLength = compareLength;
+        }
+
+        return longestNameLength;
     }
 
     public int[] getNextCircuitState() {
@@ -509,7 +530,10 @@ public class CSEngine {
                 for(int j = 0; j < temp.size() - 1; j++)
                     adjListString += (temp.get(j) + 1) + ", ";
                 adjListString += (temp.getLast() + 1) + "]";
-            } else
+
+            } else if(circuit.getNode(i) instanceof OutputVariableNode)
+                adjListString += "output]";
+            else
                 adjListString += "]";
 
             

@@ -1,11 +1,9 @@
 import java.awt.Color;
-import java.awt.Dialog;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -13,6 +11,7 @@ import javax.swing.SwingUtilities;
 import simulator.circuit.project.*;
 
 public class CSExample extends JPanel implements ActionListener {
+    private static final long serialVersionUID = 1L;
     private CSGraph circuit;
     private CSEngine engine;
     private int maxCycles;
@@ -33,16 +32,17 @@ public class CSExample extends JPanel implements ActionListener {
         maxCycles = engine.getLongestSequenceLength();
         cycleCount = 0;
 
+        hSegments = new HorizontalSegment[3];
+        vSegments = new VerticalSegment[4];
+
         setLayout(null);
     }
 
     public void addComponents() {
         // horizontal segments
-        hSegments = new HorizontalSegment[3];
-
-        HorizontalSegment seg = new HorizontalSegment((OutputVariableNode)circuit.getNode("b"));
-        seg.setSize(90, 20);
-        seg.setLocation(150, 100);
+        HorizontalSegment seg1 = new HorizontalSegment((OutputVariableNode)circuit.getNode("b"));
+        seg1.setSize(90, 20);
+        seg1.setLocation(150, 100);
         add(seg);
 
         HorizontalSegment seg2 = new HorizontalSegment((OutputVariableNode)circuit.getNode("c"));
@@ -55,13 +55,11 @@ public class CSExample extends JPanel implements ActionListener {
         seg3.setLocation(150, 340);
         add(seg3);
 
-        hSegments[0] = seg;
+        hSegments[0] = seg1;
         hSegments[1] = seg2;
         hSegments[2] = seg3;
 
         // vertical segments
-        vSegments = new VerticalSegment[4];
-
         VerticalSegment seg4 = new VerticalSegment((OutputVariableNode)circuit.getNode("a"));
         seg4.setSize(20, 90);
         seg4.setLocation(125, 125);
@@ -94,6 +92,7 @@ public class CSExample extends JPanel implements ActionListener {
         nextCycleButton.setLocation(125, 400);
         add(nextCycleButton);
 
+        // print the headers
         for(String nodeName : engine.getTrackedNodeNames())
             System.out.printf("%3s", nodeName);
         System.out.println();
@@ -119,6 +118,7 @@ public class CSExample extends JPanel implements ActionListener {
     }
 
     static class HorizontalSegment extends JPanel {
+        private static final long serialVersionUID = 1L;
         private OutputVariableNode source;
 
         public HorizontalSegment(OutputVariableNode source) {
@@ -139,6 +139,7 @@ public class CSExample extends JPanel implements ActionListener {
     }
 
     static class VerticalSegment extends JPanel {
+        private static final long serialVersionUID = 1L;
         private OutputVariableNode source;
 
         public VerticalSegment(OutputVariableNode source) {
@@ -157,8 +158,6 @@ public class CSExample extends JPanel implements ActionListener {
             g.fillRect(0, 0, 20, 90);
         }
     }
-
-    
 
     private static void showExampleGUI() {
         JFrame frame = new JFrame("Seven Segment Display Problem");

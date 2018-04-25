@@ -138,7 +138,7 @@ public class CircuitEditor {
                     case 7:     return;
                 }
             } catch(IllegalArgumentException iae) {
-                System.err.println(iae.getMessage());
+                System.err.println("\n" + iae.getMessage());
                 continue;
             }
             System.out.println("\nSuccessfully created a new node in the circuit");
@@ -153,7 +153,7 @@ public class CircuitEditor {
             engine.removeNode(targetNode);
             System.out.println("\nSuccessfully removed " + targetNode);
         } catch(IllegalArgumentException iae) {
-            System.err.println(iae.getMessage());
+            System.err.println("\n" + iae.getMessage());
         }
     }
 
@@ -168,7 +168,7 @@ public class CircuitEditor {
             engine.renameNode(userIntInput - 1, newName);
             System.out.println("\nSuccessfully renamed node to: " + newName);
         } catch(IllegalArgumentException iae) {
-            System.err.println(iae.getMessage());
+            System.err.println("\n" + iae.getMessage());
         }
     }
 
@@ -226,7 +226,7 @@ public class CircuitEditor {
             engine.addConnection(sourceNodeIndex, targetNodeIndex);
             System.out.println("\nSuccessfully added connection from " + (sourceNodeIndex + 1) + " to " + (targetNodeIndex + 1));
         } catch(IllegalArgumentException iae) {
-            System.err.println(iae.getMessage());
+            System.err.println("\n" + iae.getMessage());
         }
     }
 
@@ -244,7 +244,7 @@ public class CircuitEditor {
             engine.removeConnection(sourceNodeIndex, targetNodeIndex);
             System.out.println("\nSuccessfully removed connection from " + (sourceNodeIndex + 1) + " to " + (targetNodeIndex + 1));
         } catch(IllegalArgumentException iae) {
-            System.err.println(iae.getMessage());
+            System.err.println("\n" + iae.getMessage());
         }
     }
 
