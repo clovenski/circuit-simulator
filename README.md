@@ -86,7 +86,7 @@ You can also save your circuits, and the save files will be located in a folder 
 
 ## Example
 
-Please check out the example folder in this repository as it provides a nice demonstration of using this program to solve the seven segment display problem.
+Please check out the [example](example/) folder in this repository as it provides a nice demonstration of using this program to solve the seven segment display problem.
 
 Here are some examples of the actual program itself
 
