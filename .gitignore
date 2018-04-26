@@ -4,4 +4,6 @@ src/simulator/circuit/project/*
 !src/simulator/circuit/project/*.java
 example/*
 !example/cs-saves
+!example/captures
+!example/README.md
 !example/*.java

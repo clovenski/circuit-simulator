@@ -101,9 +101,12 @@ public class CSExample extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         values = engine.getNextCircuitState();
-        for(int value : values)
-            System.out.printf("%3d", value);
-        System.out.println();
+
+        if(cycleCount < maxCycles) {
+            for(int value : values)
+                System.out.printf("%3d", value);
+            System.out.println();
+        }
 
         for(HorizontalSegment seg : hSegments)
             seg.repaint();
