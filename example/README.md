@@ -25,7 +25,7 @@ Now `CSExample.java` was programmed to expect a specific save file (one that I h
 ![Alt text](captures/7seg_format.PNG)
 
 + according to the format above, name your output variables "a" through "g" appropriately
-+ ensure that it is ready to test
++ ensure that your circuit is ready to test
 + save your circuit with the file name "SevenSegmentExample" or whatever you like
 + copy the file into the "cs-saves" folder located inside this directory (it should be a folder that already includes "SevenSegmentExample")
 + if you named your file something other than "SevenSegmentExample" then make a change in `CSExample.java`, in its constructor it calls the method `CSFileIO.readSaveFile()`, change `SevenSegmentExample` to match your custom file name
