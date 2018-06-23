@@ -4,8 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-/* Graph needs to be directed, unweighted that will take in CSNode objects as its nodes.
- * Represent this graph with adjacency lists.
+/* Graph date structure to represent the circuits created by the user.
  */
 public class CSGraph implements Serializable {
     private static final long serialVersionUID = 1L;
