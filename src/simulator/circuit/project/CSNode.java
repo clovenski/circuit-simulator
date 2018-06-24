@@ -7,11 +7,13 @@ public abstract class CSNode implements Serializable {
     protected int value;
     protected String name;
     protected int trackNum;
+    private final String NODE_TYPE;
     private static final long serialVersionUID = 1L;
     
-    public CSNode(String name) {
+    public CSNode(String name, String type) {
         value = 0;
         this.name = name;
+        NODE_TYPE = type;
         trackNum = 0;
     }
 
@@ -41,6 +43,10 @@ public abstract class CSNode implements Serializable {
 
     public void resetTrackNum() {
         trackNum = 0;
+    }
+
+    public String getNodeType() {
+        return NODE_TYPE;
     }
 
     public abstract void updateValue();

@@ -25,7 +25,6 @@ public class CSFileIO {
 
         oos.writeObject(circuit);
         oos.close();
-        fos.close();        
     }
 
     public static CSGraph readSaveFile(String fileName) throws FileNotFoundException, IOException, ClassNotFoundException, ClassCastException {
@@ -41,7 +40,6 @@ public class CSFileIO {
         circuit = (CSGraph)ois.readObject();
 
         ois.close();
-        fis.close();
 
         return circuit;
     }

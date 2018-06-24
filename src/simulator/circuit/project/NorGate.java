@@ -4,7 +4,7 @@ public class NorGate extends Gate {
     private static final long serialVersionUID = 1L;
 
     public NorGate(String name) {
-        super(name);
+        super(name, "NOR");
     }
 
     public void updateValue() {

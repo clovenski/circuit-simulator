@@ -4,7 +4,7 @@ public class NandGate extends Gate {
     private static final long serialVersionUID = 1L;
 
     public NandGate(String name) {
-        super(name);
+        super(name, "NAND");
     }
 
     public void updateValue() {

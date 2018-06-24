@@ -7,8 +7,8 @@ public abstract class FlipFlop extends CSNode {
     protected FFOutNode outNode;
     protected FFOutNode outNodeNegated;
 
-    public FlipFlop(String name) {
-        super(name);
+    public FlipFlop(String name, String type) {
+        super(name, type);
     }
 
     public void setOutNodes(FFOutNode outNode, FFOutNode outNodeNegated) {

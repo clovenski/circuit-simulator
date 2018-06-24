@@ -4,7 +4,7 @@ public class OrGate extends Gate {
     private static final long serialVersionUID = 1L;
     
     public OrGate(String name) {
-        super(name);
+        super(name, "OR");
     }
 
     public void updateValue() {

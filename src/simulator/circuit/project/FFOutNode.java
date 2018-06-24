@@ -5,7 +5,7 @@ public class FFOutNode extends CSNode {
     private final FlipFlop inputNode;
 
     public FFOutNode(String name, FlipFlop inputNode) {
-        super(name);
+        super(name, "FFOUT");
         this.inputNode = inputNode;
     }
 

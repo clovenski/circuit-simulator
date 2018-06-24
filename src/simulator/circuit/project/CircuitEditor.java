@@ -65,34 +65,60 @@ public class CircuitEditor {
     private void editNodes() {
         int userInput;
         String[] nodeNames;
+        String[] nodeTypes;
+        boolean printAltMode = false;
         ArrayList<String> options = new ArrayList<String>();
         options.add("Add a node");
         options.add("Remove a node");
         options.add("Rename a node");
+        options.add("Toggle print mode");
         options.add("Return");
 
         do {
             System.out.println("\nCS > Main Menu > Circuit Editor > Edit Nodes");
             System.out.printf("%17s nodes:\n\n", circuitName);
             nodeNames = engine.getCircuitNodeNames();
-            for(int i = 1; i <= nodeNames.length; i++) {
-                System.out.print(i + ". " + nodeNames[i - 1] + "  ");
-                if(i % 5 == 0 && i != nodeNames.length)
-                    System.out.println();
+            nodeTypes = engine.getCircuitNodeTypes();
+
+            if(!printAltMode) { // if printing normally, node names along with their type
+                System.out.printf("%3s | %-6s | %s\n", "NUM", "TYPE", "NAME");
+                System.out.println("----+--------+----------------------");
+                for(int i = 1; i <= nodeNames.length; i++)
+                    System.out.printf("%3d | %6s | %s\n", i, nodeTypes[i - 1], nodeNames[i - 1]);
+                System.out.println("------------------------------------");
+
+            } else { // print node names in a condensed list, without their type
+                for(int i = 1; i <= nodeNames.length; i++) {
+                    System.out.print(i + ". " + nodeNames[i - 1] + "  ");
+                    if(i % 5 == 0 && i != nodeNames.length)
+                        System.out.println();
+                }
             }
 
             System.out.println("\n");
             CSUserInterface.displayOptions(options);
             userInput = CSUserInterface.getUserOptInput(options, inputSource);
 
-            switch(userInput) {
-                case 1:     addNode();
-                            break;
-                case 2:     removeNode();
-                            break;
-                case 3:     renameNode();
-                            break;
-                case 4:     return;
+            try {
+                switch(userInput) {
+                    case 1:     addNode();
+                                break;
+                    case 2:     removeNode();
+                                break;
+                    case 3:     renameNode();
+                                break;
+                    case 4:     if(printAltMode)
+                                    System.out.println("\nNodes will now be printed normally, with one node per line");
+                                else
+                                    System.out.println("\nNodes will now be printed in a condensed list, without their type");
+                                printAltMode = !printAltMode;
+                                System.out.println("\nPress [ENTER] to return");
+                                inputSource.nextLine();
+                                break;
+                    case 5:     return;
+                }
+            } catch(IllegalArgumentException iae) {
+                System.err.println("\n" + iae.getMessage());
             }
         } while(true);
     }
@@ -101,27 +127,40 @@ public class CircuitEditor {
         int userInput;
         String newNodeName = "";
         String sourceNodeID = "";
+        final int ADD_INVERTER_OPT;
+        final int RETURN_OPT;
         ArrayList<String> options = new ArrayList<String>();
         options.add("Add an input node");
         options.add("Add an output node");
         options.add("Add a D-flip-flop");
         options.add("Add an AND gate");
+        options.add("Add a NAND gate");
         options.add("Add an OR gate");
+        options.add("Add a NOR gate");
+        options.add("Add an XOR gate");
+        options.add("Add an NXOR gate");
         options.add("Add an inverter");
         options.add("Return");
+
+        ADD_INVERTER_OPT = options.indexOf("Add an inverter") + 1;
+        RETURN_OPT = options.size();
 
         do {
             System.out.println("\nCS > Main Menu > Circuit Editor > Edit Nodes > Add Node");
             CSUserInterface.displayOptions(options);
             userInput = CSUserInterface.getUserOptInput(options, inputSource);
 
-            if(userInput == 6) { // if user wants to add an inverter
-                sourceNodeID = CSUserInterface.getUserStringInput("Name of the node to invert: ", inputSource);
-            } else if(userInput != 7) {// if user does not want to "return"
-                newNodeName = CSUserInterface.getUserStringInput("Node name: ", inputSource);
-            }
-
             try {
+                if(userInput == ADD_INVERTER_OPT) { // if user wants to add an inverter
+                    if(engine.getCircuitSize() == 0)
+                        throw new IllegalArgumentException("There are no nodes for you to invert");
+                    else
+                        sourceNodeID = CSUserInterface.getUserStringInput("Name of the node to invert: ", inputSource);
+    
+                } else if(userInput != RETURN_OPT) { // if user does not want to "return"
+                    newNodeName = CSUserInterface.getUserStringInput("Node name: ", inputSource);
+                }
+
                 switch(userInput) {
                     case 1:     engine.addInputNode(newNodeName);
                                 break;
@@ -131,11 +170,19 @@ public class CircuitEditor {
                                 break;
                     case 4:     engine.addAndGate(newNodeName);
                                 break;
-                    case 5:     engine.addOrGate(newNodeName);
+                    case 5:     engine.addNandGate(newNodeName);
                                 break;
-                    case 6:     engine.addInverter(sourceNodeID);
+                    case 6:     engine.addOrGate(newNodeName);
                                 break;
-                    case 7:     return;
+                    case 7:     engine.addNorGate(newNodeName);
+                                break;
+                    case 8:     engine.addXorGate(newNodeName);
+                                break;
+                    case 9:     engine.addNXorGate(newNodeName);
+                                break;
+                    case 10:    engine.addInverter(sourceNodeID);
+                                break;
+                    case 11:    return;
                 }
             } catch(IllegalArgumentException iae) {
                 System.err.println("\n" + iae.getMessage());
@@ -145,8 +192,11 @@ public class CircuitEditor {
         } while(true);
     }
 
-    private void removeNode() {
+    private void removeNode() throws IllegalArgumentException {
         String targetNode;
+        int circuitSize = engine.getCircuitSize();
+        if(circuitSize == 0)
+            throw new IllegalArgumentException("There are no nodes for you to remove");
 
         targetNode = CSUserInterface.getUserStringInput("Name of the node to remove: ", inputSource);
         try {
@@ -157,11 +207,14 @@ public class CircuitEditor {
         }
     }
 
-    private void renameNode() {
+    private void renameNode() throws IllegalArgumentException {
         int userIntInput;
         String newName;
+        int circuitSize = engine.getCircuitSize();
+        if(circuitSize == 0)
+            throw new IllegalArgumentException("There are no nodes for you to rename");
 
-        userIntInput = CSUserInterface.getUserIntInput("Enter the number of the node to rename: ", engine.getCircuitSize(), inputSource);
+        userIntInput = CSUserInterface.getUserIntInput("Enter the number of the node to rename: ", circuitSize, inputSource);
         newName = CSUserInterface.getUserStringInput("Enter the new name: ", inputSource);
 
         try {
@@ -175,6 +228,7 @@ public class CircuitEditor {
     private void editConnections() {
         int userInput;
         String[] nodeNames;
+        String[] nodeTypes;
         String[] circuitConnections;
         ArrayList<String> options = new ArrayList<String>();
         options.add("Add a connection");
@@ -194,28 +248,39 @@ public class CircuitEditor {
 
             System.out.println("\n");
 
+            nodeTypes = engine.getCircuitNodeTypes();
             circuitConnections = engine.getCircuitConnectionStatus();
-            for(String connectionStatus : circuitConnections)
-                System.out.println(connectionStatus);
+            System.out.printf("%-6s | %-6s | %s\n", "TYPE", "NUM", "ADJACENCY SET");
+            System.out.println("-------+--------+----------------------");
+            for(int i = 0; i < circuitConnections.length; i++)
+                System.out.printf("%6s | %s\n", nodeTypes[i], circuitConnections[i]);
+            System.out.println("---------------------------------------");
 
             System.out.println();
             CSUserInterface.displayOptions(options);
             userInput = CSUserInterface.getUserOptInput(options, inputSource);
 
-            switch(userInput) {
-                case 1:     addConnection();
-                            break;
-                case 2:     removeConnection();
-                            break;
-                case 3:     return;
+            try {
+                switch(userInput) {
+                    case 1:     addConnection();
+                                break;
+                    case 2:     removeConnection();
+                                break;
+                    case 3:     return;
+                }
+            } catch(IllegalArgumentException iae) {
+                System.err.println("\n" + iae.getMessage());
             }
         } while(true);
     }
 
-    private void addConnection() {
+    private void addConnection() throws IllegalArgumentException {
         int sourceNodeIndex;
         int targetNodeIndex;
         int circuitSize = engine.getCircuitSize();
+        if(circuitSize <= 1)
+            throw new IllegalArgumentException("There are not enough nodes to add a connection");
+
         String promptSource = "Enter the number of the node to be the source of this connection: ";
         String promptTarget = "Enter the number of the node to be the target of this connection: ";
 
@@ -230,10 +295,13 @@ public class CircuitEditor {
         }
     }
 
-    private void removeConnection() {
+    private void removeConnection() throws IllegalArgumentException {
         int sourceNodeIndex;
         int targetNodeIndex;
         int circuitSize = engine.getCircuitSize();
+        if(circuitSize == 0)
+            throw new IllegalArgumentException("There are no nodes for you to remove");
+
         String promptSource = "Enter the number of the node that is the source of this connection: ";
         String promptTarget = "Enter the number of the node that is the target of this connection: ";
 

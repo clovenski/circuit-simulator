@@ -4,7 +4,7 @@ public class AndGate extends Gate {
     private static final long serialVersionUID = 1L;
 
     public AndGate(String name) {
-        super(name);
+        super(name, "AND");
     }
 
     public void updateValue() {

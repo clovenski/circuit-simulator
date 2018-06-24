@@ -8,12 +8,12 @@ public class InputVariableNode extends CSNode {
     private int currentIndex;
 
     public InputVariableNode(String name) {
-        super(name);
+        super(name, "INPUT");
         currentIndex = 0;
     }
 
     public InputVariableNode(String name, int[] inputSeq) {
-        super(name);
+        super(name, "INPUT");
         this.inputSeq = inputSeq;
         currentIndex = 0;
     }

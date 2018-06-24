@@ -77,8 +77,24 @@ public class CSEngine {
         circuit.addNode(new AndGate(nodeID));
     }
 
+    public void addNandGate(String nodeID) throws IllegalArgumentException {
+        circuit.addNode(new NandGate(nodeID));
+    }
+
     public void addOrGate(String nodeID) throws IllegalArgumentException {
         circuit.addNode(new OrGate(nodeID));
+    }
+
+    public void addNorGate(String nodeID) throws IllegalArgumentException {
+        circuit.addNode(new NorGate(nodeID));
+    }
+
+    public void addXorGate(String nodeID) throws IllegalArgumentException {
+        circuit.addNode(new XorGate(nodeID));
+    }
+
+    public void addNXorGate(String nodeID) throws IllegalArgumentException {
+        circuit.addNode(new NXorGate(nodeID));
     }
 
     public void addInverter(String sourceNodeID) throws IllegalArgumentException {
@@ -462,6 +478,14 @@ public class CSEngine {
         return result;
     }
 
+    public String[] getCircuitNodeTypes() {
+        String[] result = new String[circuit.getSize()];
+        for(int i = 0; i < circuit.getSize(); i++)
+            result[i] = circuit.getNode(i).getNodeType();
+
+        return result;
+    }
+
     public String[] getInputNodeNames() {
         String[] result = new String[inputNodeNames.size()];
 
@@ -525,7 +549,7 @@ public class CSEngine {
 
         for(int i = 0; i < circuit.getSize(); i++) {
             temp = circuit.getAdjList(i);
-            adjListString = String.format("%2d -> [", (i + 1));
+            adjListString = String.format("%3d -> [", (i + 1));
             if(!temp.isEmpty()) {
                 for(int j = 0; j < temp.size() - 1; j++)
                     adjListString += (temp.get(j) + 1) + ", ";

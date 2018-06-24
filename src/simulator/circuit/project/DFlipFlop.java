@@ -5,7 +5,7 @@ public class DFlipFlop extends FlipFlop implements VariableInput {
     private CSNode inputNode;
 
     public DFlipFlop(String name) {
-        super(name);
+        super(name, "DFF");
     }
 
     public void addInputNode(CSNode inputNode) {

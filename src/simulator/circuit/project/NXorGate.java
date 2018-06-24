@@ -4,7 +4,7 @@ public class NXorGate extends Gate {
     private static final long serialVersionUID = 1L;
 
     public NXorGate(String name) {
-        super(name);
+        super(name, "NXOR");
     }
 
     // Note: implementing the XOR logic that odd number of 1's result in an output value of 1, 0 otherwise

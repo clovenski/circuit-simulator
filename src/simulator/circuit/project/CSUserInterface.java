@@ -7,10 +7,12 @@ import java.util.Scanner;
 
 public class CSUserInterface {
     public static void displayOptions(ArrayList<String> options) {
+        int listSize = options.size();
+        int optNumFormat = String.valueOf(listSize).length();
         int optNum = 1;
 
         for(String option : options) {
-            System.out.println(optNum + ". " + option);
+            System.out.printf("%" + optNumFormat + "d. %s\n", optNum, option);
             optNum++;
         }
         System.out.println();
@@ -91,9 +93,12 @@ public class CSUserInterface {
         return result;
     }
 
-    public static int getUserIntInput(String prompt, int upperBound, Scanner inputSource) {
+    public static int getUserIntInput(String prompt, int upperBound, Scanner inputSource) throws IllegalArgumentException {
         StringTokenizer tokenizer;
         int userInput;
+
+        if(upperBound == 0)
+            throw new IllegalArgumentException("Upper bound must be greater than zero");
 
         do {
             System.out.print(prompt);

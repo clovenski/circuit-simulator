@@ -5,7 +5,7 @@ public class OutputVariableNode extends CSNode implements VariableInput {
     private CSNode inputNode;
 
     public OutputVariableNode(String name) {
-        super(name);
+        super(name, "OUTPUT");
     }
 
     public void addInputNode(CSNode inputNode) {

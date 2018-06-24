@@ -5,7 +5,7 @@ public class Inverter extends CSNode {
     private final CSNode inputNode;
 
     public Inverter(String name, CSNode inputNode) {
-        super(name);
+        super(name, "INVERT");
         this.inputNode = inputNode;
     }
 
