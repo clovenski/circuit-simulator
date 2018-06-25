@@ -12,12 +12,16 @@ import simulator.circuit.project.CSGraph.IllegalCircuitStateException;
 public class CSEngine {
     private CSGraph circuit;
     private ArrayList<String> inputNodeNames;
+    private ArrayList<String> outputNodeNames;
+    private ArrayList<String> flipFlopNodeNames;
     private ArrayList<String> invertedNodes;
     private ArrayList<CSNode> trackedNodes;
 
     public CSEngine() {
         circuit = new CSGraph();
         inputNodeNames = new ArrayList<String>();
+        outputNodeNames = new ArrayList<String>();
+        flipFlopNodeNames = new ArrayList<String>();
         invertedNodes = new ArrayList<String>();
         trackedNodes = new ArrayList<CSNode>();
     }
@@ -29,6 +33,8 @@ public class CSEngine {
         this.circuit = circuit;
 
         inputNodeNames = new ArrayList<String>();
+        outputNodeNames = new ArrayList<String>();
+        flipFlopNodeNames = new ArrayList<String>();
         invertedNodes = new ArrayList<String>();
         trackedNodes = new ArrayList<CSNode>();
 
@@ -37,8 +43,11 @@ public class CSEngine {
 
             if(node instanceof InputVariableNode)
                 inputNodeNames.add(node.getName());
-            
-            if(node instanceof Inverter) {
+            else if(node instanceof OutputVariableNode)
+                outputNodeNames.add(node.getName());
+            else if(node instanceof FlipFlop)
+                flipFlopNodeNames.add(node.getName());
+            else if(node instanceof Inverter) {
                 inverterNode = (Inverter)node;
                 invertedNodes.add(inverterNode.getInputNode().getName());
             }
@@ -57,6 +66,7 @@ public class CSEngine {
 
     public void addOutputNode(String nodeID) throws IllegalArgumentException {
         circuit.addNode(new OutputVariableNode(nodeID));
+        outputNodeNames.add(nodeID);
     }
     
     public void addDFFNode(String nodeID) throws IllegalArgumentException {
@@ -67,6 +77,8 @@ public class CSEngine {
         circuit.addNode(newDFFNodeOut);
         circuit.addNode(newDFFNodeOutNeg);
         newDFFNode.setOutNodes(newDFFNodeOut, newDFFNodeOutNeg);
+
+        flipFlopNodeNames.add(nodeID);
 
         // add appropriate edges
         circuit.addEdge(circuit.getSize() - 3, circuit.getSize() - 2);
@@ -169,17 +181,20 @@ public class CSEngine {
         targetNode.setName(newName);
 
         // rename target node's inverter as well, if it exists
-        if(invertedNodes.contains(targetNodeName))
+        if(invertedNodes.remove(targetNodeName)) {
             circuit.getNode(targetNodeName + "-inverter").setName(newName + "-inverter");
+            invertedNodes.add(newName);
+        }
 
         // if renamed an input node, update the inputNodeNames array
         if(inputNodeNames.remove(targetNodeName))
             inputNodeNames.add(newName);
         
-        // if renamed a flip flop, also need to rename its output nodes
-        if(targetNode instanceof FlipFlop) {
+        // if renamed a flip flop, also need to rename its output nodes and update the flipFlopNodeNames array
+        if(flipFlopNodeNames.remove(targetNodeName)) {
             circuit.getNode(nodeIndex + 1).setName(newName + "-out");
             circuit.getNode(nodeIndex + 2).setName(newName + "-outnegated");
+            flipFlopNodeNames.add(newName);
         }
     }
 
@@ -224,14 +239,20 @@ public class CSEngine {
     private void removeInverter(int inverterIndex, ArrayList<Integer> indecesToRemove) {
         CSNode neighborNode;
         VariableInput varInputNode;
+        Inverter targetInverter = (Inverter)circuit.getNode(inverterIndex);
 
         indecesToRemove.add(inverterIndex);
 
         for(int neighborIndex : circuit.getAdjList(inverterIndex)) {
             neighborNode = circuit.getNode(neighborIndex);
 
-            varInputNode = (VariableInput)neighborNode;
-            varInputNode.removeInputNode(circuit.getNode(inverterIndex));
+            if(neighborNode instanceof Inverter) {
+                removeInverter(neighborIndex, indecesToRemove);
+                invertedNodes.remove(targetInverter.getInputNode().getName());
+            } else {
+                varInputNode = (VariableInput)neighborNode;
+                varInputNode.removeInputNode(circuit.getNode(inverterIndex));
+            }
         }
     }
 
@@ -242,19 +263,21 @@ public class CSEngine {
             throw new IllegalArgumentException(nodeID + " does not exist in this circuit");
 
         CSNode node = circuit.getNode(nodeIndex);
+
         if(node instanceof FFOutNode)
             throw new IllegalArgumentException("Output nodes for flip flops cannot be removed, try to remove the flip flop itself instead");
-        if(node instanceof FlipFlop) {
+        else if(node instanceof FlipFlop) {
+            flipFlopNodeNames.remove(node.getName());
             removeDFFNode(nodeIndex);
             return;
-        }
-        if(node instanceof Inverter) {
+        } else if(node instanceof Inverter) {
             // need to remove the source of this inverter from the invertedNodes list
             Inverter inverterNode = (Inverter)node;
             invertedNodes.remove(inverterNode.getInputNode().getName());
-        }
-        if(node instanceof InputVariableNode)
+        } else if(node instanceof InputVariableNode)
             inputNodeNames.remove(node.getName());
+        else if(node instanceof OutputVariableNode)
+            outputNodeNames.remove(node.getName());
 
 
         CSNode neighborNode;
@@ -469,7 +492,38 @@ public class CSEngine {
     public void resetCircuit() {
         circuit.reset();
     }
-    
+
+    public ArrayList<ArrayList<Integer>> getTruthTable() throws IllegalStateException {
+        // int double array formatted as:   rows = 2^n where n is number of input variables,
+        //                                  cols = number of input variables + number of output variables
+
+        if(circuit.isSequential())
+            throw new IllegalStateException("This circuit is a sequential circuit, it does not have a truth table.");
+
+        int rowSize = (int)Math.pow(2.0, inputNodeNames.size());
+        int colSize = inputNodeNames.size() + outputNodeNames.size();
+
+        ArrayList<ArrayList<Integer>> result = new ArrayList<ArrayList<Integer>>(rowSize);
+        for(int i = 0; i < rowSize; i++)
+            result.add(new ArrayList<Integer>(colSize));
+
+        // temp
+        return null;
+    }
+
+    public String[][] getTransitionTable() throws IllegalStateException {
+        // double array formatted as:   rows = 2^n where n is number of flip flops,
+        //                              cols = 2^m where m is number of input variables
+        // each string formatted as: [FF...F, ZZ..Z]    such that each F for a flip flop, each Z for an output variable,
+        //                                              both being either 0 or 1, representing their next states
+
+        if(!circuit.isSequential())
+            throw new IllegalStateException("This circuit is a combinational circuit, it does not have a transition table.");
+
+        // temp
+        return null;
+    }
+
     public String[] getCircuitNodeNames() {
         String[] result = new String[circuit.getSize()];
         for(int i = 0; i < circuit.getSize(); i++)
@@ -491,6 +545,24 @@ public class CSEngine {
 
         for(int i = 0; i < inputNodeNames.size(); i++)
             result[i] = inputNodeNames.get(i);
+
+        return result;
+    }
+
+    public String[] getOutputNodeNames() {
+        String[] result = new String[outputNodeNames.size()];
+
+        for(int i = 0; i < outputNodeNames.size(); i++)
+            result[i] = outputNodeNames.get(i);
+
+        return result;
+    }
+
+    public String[] getFlipFlopNodeNames() {
+        String[] result = new String[flipFlopNodeNames.size()];
+
+        for(int i = 0; i < flipFlopNodeNames.size(); i++)
+            result[i] = flipFlopNodeNames.get(i);
 
         return result;
     }
@@ -596,6 +668,8 @@ public class CSEngine {
         circuit = CSFileIO.readSaveFile(fileName);
 
         inputNodeNames.clear();
+        outputNodeNames.clear();
+        flipFlopNodeNames.clear();
         invertedNodes.clear();
         trackedNodes.clear();
 
@@ -604,8 +678,11 @@ public class CSEngine {
 
             if(node instanceof InputVariableNode)
                 inputNodeNames.add(node.getName());
-            
-            if(node instanceof Inverter) {
+            else if(node instanceof OutputVariableNode)
+                outputNodeNames.add(node.getName());
+            else if(node instanceof FlipFlop)
+                flipFlopNodeNames.add(node.getName());
+            else if(node instanceof Inverter) {
                 inverterNode = (Inverter)node;
                 invertedNodes.add(inverterNode.getInputNode().getName());
             }

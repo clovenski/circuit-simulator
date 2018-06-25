@@ -59,6 +59,14 @@ public class CSGraph implements Serializable {
         return temp;
     }
 
+    public boolean isSequential() {
+        for(CSNode node : nodes)
+            if(node instanceof FlipFlop)
+                return true;
+
+        return false;
+    }
+
     public boolean contains(String nodeID) {
         for(CSNode node : nodes)
             if(node.getName().equals(nodeID))
