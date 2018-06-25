@@ -43,11 +43,16 @@ Main Menu
 |   |   |   +-- add output node
 |   |   |   +-- add d-flip-flop
 |   |   |   +-- add "and" gate
+|   |   |   +-- add "nand" gate
 |   |   |   +-- add "or" gate
+|   |   |   +-- add "nor" gate
+|   |   |   +-- add "xor" gate
+|   |   |   +-- add "nxor" gate
 |   |   |   \-- add inverter
 |   |   |
 |   |   +-- remove node
-|   |   \-- rename node
+|   |   +-- rename node
+|   |   \-- toggle print mode
 |   |
 |   +-- edit connections
 |   |   |

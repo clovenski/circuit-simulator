@@ -9,18 +9,18 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 public class CSFileIO {
-    private static final String fileSeparator = System.getProperty("file.separator");
-    private static final String saveDirName = "cs-saves";
+    private static final String FILE_SEPARATOR = System.getProperty("file.separator");
+    private static final String SAVE_DIR_NAME = "cs-saves";
 
     public static void writeSaveFile(CSGraph circuit, String fileName) throws FileNotFoundException, IOException, ClassNotFoundException {
         FileOutputStream fos;
         ObjectOutputStream oos;
 
-        File dir = new File(saveDirName);
+        File dir = new File(SAVE_DIR_NAME);
         if(!dir.exists() || !dir.isDirectory())
             dir.mkdir();
 
-        fos = new FileOutputStream(dir.getName() + fileSeparator + fileName);
+        fos = new FileOutputStream(dir.getName() + FILE_SEPARATOR + fileName);
         oos = new ObjectOutputStream(fos);
 
         oos.writeObject(circuit);
@@ -32,7 +32,7 @@ public class CSFileIO {
         ObjectInputStream ois;
         CSGraph circuit;
 
-        File file = new File(saveDirName + fileSeparator + fileName);
+        File file = new File(SAVE_DIR_NAME + FILE_SEPARATOR + fileName);
 
         fis = new FileInputStream(file);
         ois = new ObjectInputStream(fis);
@@ -45,6 +45,6 @@ public class CSFileIO {
     }
 
     public static File getSaveDir() {
-        return new File(saveDirName);
+        return new File(SAVE_DIR_NAME);
     }
 }

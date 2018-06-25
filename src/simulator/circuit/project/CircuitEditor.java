@@ -7,11 +7,13 @@ public class CircuitEditor {
     private Scanner inputSource;
     private CSEngine engine;
     private String circuitName;
+    private boolean printAltMode;
 
     public CircuitEditor(CSEngine engine, String circuitName, Scanner inputSource) {
         this.engine = engine;
         this.circuitName = circuitName;
         this.inputSource = inputSource;
+        printAltMode = false;
     }
 
     public void start() {
@@ -66,7 +68,6 @@ public class CircuitEditor {
         int userInput;
         String[] nodeNames;
         String[] nodeTypes;
-        boolean printAltMode = false;
         ArrayList<String> options = new ArrayList<String>();
         options.add("Add a node");
         options.add("Remove a node");
@@ -93,9 +94,11 @@ public class CircuitEditor {
                     if(i % 5 == 0 && i != nodeNames.length)
                         System.out.println();
                 }
+
+                System.out.println();
             }
 
-            System.out.println("\n");
+            System.out.println();
             CSUserInterface.displayOptions(options);
             userInput = CSUserInterface.getUserOptInput(options, inputSource);
 
@@ -107,13 +110,7 @@ public class CircuitEditor {
                                 break;
                     case 3:     renameNode();
                                 break;
-                    case 4:     if(printAltMode)
-                                    System.out.println("\nNodes will now be printed normally, with one node per line");
-                                else
-                                    System.out.println("\nNodes will now be printed in a condensed list, without their type");
-                                printAltMode = !printAltMode;
-                                System.out.println("\nPress [ENTER] to return");
-                                inputSource.nextLine();
+                    case 4:     togglePrintMode();
                                 break;
                     case 5:     return;
                 }
@@ -223,6 +220,17 @@ public class CircuitEditor {
         } catch(IllegalArgumentException iae) {
             System.err.println("\n" + iae.getMessage());
         }
+    }
+
+    private void togglePrintMode() {
+        if(printAltMode)
+            System.out.println("\nNodes will now be printed normally, with one node per line");
+        else
+            System.out.println("\nNodes will now be printed in a condensed list, without their type");
+
+        printAltMode = !printAltMode;
+        System.out.println("\nPress [ENTER] to return");
+        inputSource.nextLine();
     }
 
     private void editConnections() {

@@ -20,9 +20,12 @@ public class CircuitSimulator {
     }
 
     public CircuitSimulator(String fileName) {
+        CSGraph circuit;
+
         try {
-            engine.loadCircuit(fileName);
-            circuitName = "fileName";
+            circuit = CSFileIO.readSaveFile(fileName);
+            engine = new CSEngine(circuit);
+            circuitName = fileName;
         } catch(FileNotFoundException fnfe) {
             System.err.println("Error: could not find saved circuit named " + fileName + ".");
             System.err.println("Creating a new circuit . . .");
@@ -227,7 +230,13 @@ public class CircuitSimulator {
     }
 
     public static void main(String[] args) {
-        CircuitSimulator program = new CircuitSimulator();
+        CircuitSimulator program;
+
+        if(args.length > 0)
+            program = new CircuitSimulator(args[0]);
+        else
+            program = new CircuitSimulator();
+
         program.start();
         program.exit();
     }
