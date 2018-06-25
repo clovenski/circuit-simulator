@@ -26,6 +26,7 @@ public class CircuitSimulator {
             circuit = CSFileIO.readSaveFile(fileName);
             engine = new CSEngine(circuit);
             circuitName = fileName;
+            System.out.println("Successfully loaded circuit: " + fileName + ".");
         } catch(FileNotFoundException fnfe) {
             System.err.println("Error: could not find saved circuit named " + fileName + ".");
             System.err.println("Creating a new circuit . . .");
@@ -42,6 +43,8 @@ public class CircuitSimulator {
             engine = new CSEngine();
             circuitName = "new-circuit";
         }
+
+        System.out.println();
 
         circuitEdited = false;
         inputSource = new Scanner(System.in);
@@ -141,7 +144,7 @@ public class CircuitSimulator {
 
         if(files != null)
             for(int i = 0; i < files.length; i++) 
-                if(files[0].getName().equals(fileName)) {
+                if(files[i].getName().equals(fileName)) {
                     overwriting = true;
                     break;
                 }

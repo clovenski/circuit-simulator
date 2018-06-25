@@ -6,3 +6,5 @@ example/*
 !example/captures
 !example/README.md
 !example/*.java
+
+build

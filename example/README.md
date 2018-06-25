@@ -4,7 +4,7 @@ The seven segment display problem involves designing a circuit that will impleme
 
 Below is an example that solves this problem using a saved circuit created by the circuit simulator program.
 
-![Alt text](captures/7seg_problem.gif)
+![Alt text](captures/7seg_example.gif)
 
 ## Reproduction
 
@@ -12,11 +12,11 @@ To reproduce this example, compile and run the `CSExample.java` file located wit
 
 Windows:
 
-`javac -cp ..\src CSExample.java`
+`javac -cp ..\build CSExample.java`
 
 Then run the program with
 
-`java -cp ".;..\src" CSExample`
+`java -cp ".;..\build" CSExample`
 
 ## Usage
 
@@ -28,5 +28,4 @@ Now `CSExample.java` was programmed to expect a specific save file (one that I h
 + ensure that your circuit is ready to test
 + save your circuit with the file name "SevenSegmentExample" or whatever you like
 + copy the file into the "cs-saves" folder located inside this directory (it should be a folder that already includes "SevenSegmentExample")
-+ if you named your file something other than "SevenSegmentExample" then make a change in `CSExample.java`, in its constructor it calls the method `CSFileIO.readSaveFile()`, change `SevenSegmentExample` to match your custom file name
-+ compile and run just like in the instructions above
++ if you named your file something other than "SevenSegmentExample" then use your circuit file name as an argument when running the example program

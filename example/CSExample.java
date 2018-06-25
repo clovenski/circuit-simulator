@@ -2,6 +2,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -21,12 +23,12 @@ public class CSExample extends JPanel implements ActionListener {
     private VerticalSegment[] vSegments;
     private int[] values;
 
-    public CSExample() {
-        try {
-            circuit = CSFileIO.readSaveFile("SevenSegmentExample");
-        } catch(Exception e) {
-            System.err.println(e.getMessage());
-        }
+    public CSExample(String fileName) throws FileNotFoundException, IOException, ClassNotFoundException, ClassCastException {
+        if(fileName == null)
+            fileName = "SevenSegmentExample";
+
+
+        circuit = CSFileIO.readSaveFile(fileName);
 
         engine = new CSEngine(circuit);
         maxCycles = engine.getLongestSequenceLength();
@@ -162,17 +164,21 @@ public class CSExample extends JPanel implements ActionListener {
         }
     }
 
-    private static void showExampleGUI() {
+    private static void showExampleGUI(String fileName) {
         JFrame frame = new JFrame("Seven Segment Display Problem");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(400, 600);
         frame.setResizable(false);
 
-        CSExample panel = new CSExample();
-        panel.addComponents();
-        frame.add(panel);
+        try {
+            CSExample panel = new CSExample(fileName);
+            panel.addComponents();
+            frame.add(panel);
 
-        frame.setVisible(true);
+            frame.setVisible(true);
+        } catch(Exception e) {
+            System.err.println("Error: " + e.getMessage());
+        }
     }
 
     public static void main(String[] args) {
@@ -180,7 +186,10 @@ public class CSExample extends JPanel implements ActionListener {
         
             @Override
             public void run() {
-                showExampleGUI();
+                if(args.length > 0)
+                    showExampleGUI(args[0]);
+                else
+                    showExampleGUI(null);
             }
         });
     }
