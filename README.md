@@ -72,7 +72,8 @@ Main Menu
 |   |   +-- track all nodes
 |   |   \-- untrack all nodes
 |   |
-|   \-- run test
+|   +-- run test
+|   \-- print truth or transition table
 |
 +-- save circuit
 +-- load circuit
@@ -95,6 +96,7 @@ Some remarks on using the program
 
 + adding a connection to nodes that can only have one input reference, such as an output variable node, will disconnect the previous connection to that node, if any
 + if you remove a connection between a node and its inverter, that inverter will be removed along with all of the inverter's connections; this effect also occurs recursively, meaning if that inverter also had its own inverter, the latter inverter is removed as well, and so on
++ truth tables are printed for combinational circuits (ones without flip flops), and transition tables are printed for sequential circuits (ones with flip flops)
 
 ## Example
 

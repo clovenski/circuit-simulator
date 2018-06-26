@@ -16,9 +16,17 @@ public class CircuitTester {
 
     public void start() {
         int userInput;
+
+        String printTableOpt;
+        if(engine.isCircuitSequential())
+            printTableOpt = "Print transition table";
+        else
+            printTableOpt = "Print truth table";
+
         ArrayList<String> options = new ArrayList<String>();
         options.add("Edit tracked nodes");
         options.add("Test circuit");
+        options.add(printTableOpt);
         options.add("Return");
 
         do {
@@ -32,7 +40,12 @@ public class CircuitTester {
                             break;
                 case 2:     printCircuitTest();
                             break;
-                case 3:     return;
+                case 3:     if(engine.isCircuitSequential())
+                                printTransitionTable();
+                            else
+                                printTruthTable();
+                            break;
+                case 4:     return;
             }
         } while(true);
     }
@@ -177,6 +190,68 @@ public class CircuitTester {
 
         System.out.println("\nPress [ENTER] to return");
         inputSource.nextLine();
+    }
 
+    private void printTransitionTable() {
+
+    }
+
+    private void printTruthTable() {
+        ArrayList<ArrayList<Integer>> truthTableData;
+        String[] inputNodeNames;
+        String[] outputNodeNames;
+        int fieldWidth = 0;
+
+        try {
+            truthTableData = engine.getTruthTableData();
+        } catch(IllegalStateException ise) {
+            System.err.println("\n" + ise.getMessage());
+            return;
+        } catch(Exception e) {
+            System.err.println("\nUnknown error: " + e.getMessage());
+            return;
+        }
+
+        inputNodeNames = engine.getInputNodeNames();
+        outputNodeNames = engine.getOutputNodeNames();
+        // fieldWidth = longest name in the two arrays above + 1
+        for(String name : inputNodeNames)
+            if(name.length() > fieldWidth)
+                fieldWidth = name.length();
+        for(String name : outputNodeNames)
+            if(name.length() > fieldWidth)
+                fieldWidth = name.length();
+        fieldWidth = fieldWidth + 1;
+
+        // print input and output nodes
+        System.out.println();
+        for(String name : inputNodeNames)
+            System.out.printf("%" + fieldWidth + "s", name);
+        System.out.print(" | ");
+        for(String name : outputNodeNames)
+            System.out.printf("%" + fieldWidth + "s", name);
+        System.out.println();
+
+        // print dashes to separate headers from data
+        int dashesNeeded = fieldWidth * (inputNodeNames.length + outputNodeNames.length) + 3;
+        for(int i = 0; i < dashesNeeded; i++)
+            System.out.print("-");
+        System.out.println();
+
+        // print the table
+        for(int i = 0; i < truthTableData.size(); i++) {
+            for(int j = 0; j < inputNodeNames.length; j++)
+                System.out.printf("%" + fieldWidth + "d", truthTableData.get(i).get(j).intValue());
+
+            System.out.print(" | ");
+
+            for(int j = inputNodeNames.length; j < truthTableData.get(0).size(); j++)
+                System.out.printf("%" + fieldWidth + "d", truthTableData.get(i).get(j).intValue());
+
+            System.out.println();
+        }
+
+        System.out.println("\nPress [ENTER] to return");
+        inputSource.nextLine();
     }
 }

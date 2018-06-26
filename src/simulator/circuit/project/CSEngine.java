@@ -3,6 +3,7 @@ package simulator.circuit.project;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.StringTokenizer;
@@ -493,32 +494,112 @@ public class CSEngine {
         circuit.reset();
     }
 
-    public ArrayList<ArrayList<Integer>> getTruthTable() throws IllegalStateException {
+    public boolean isCircuitSequential() {
+        return circuit.isSequential();
+    }
+
+    public ArrayList<ArrayList<Integer>> getTruthTableData() throws IllegalStateException {
         // int double array formatted as:   rows = 2^n where n is number of input variables,
         //                                  cols = number of input variables + number of output variables
 
         if(circuit.isSequential())
-            throw new IllegalStateException("This circuit is a sequential circuit, it does not have a truth table.");
+            throw new IllegalStateException("This circuit is a sequential circuit, it does not have a truth table");
+        if(inputNodeNames.size() == 0)
+            throw new IllegalStateException("Input variables are needed to build the truth table");
+        if(outputNodeNames.size() == 0)
+            throw new IllegalStateException("Output variables are needed to build the truth table");
 
         int rowSize = (int)Math.pow(2.0, inputNodeNames.size());
         int colSize = inputNodeNames.size() + outputNodeNames.size();
 
+        // initialize the result double array to appropriate size
         ArrayList<ArrayList<Integer>> result = new ArrayList<ArrayList<Integer>>(rowSize);
-        for(int i = 0; i < rowSize; i++)
+        for(int i = 0; i < rowSize; i++) {
             result.add(new ArrayList<Integer>(colSize));
+            for(int j = 0; j < colSize; j++)
+                result.get(i).add(Integer.valueOf(0));
+        }
 
-        // temp
-        return null;
+        // array lists to store references to input and output variables in circuit
+        ArrayList<InputVariableNode> inputVariables = new ArrayList<InputVariableNode>();
+        ArrayList<OutputVariableNode> outputVariables = new ArrayList<OutputVariableNode>();
+
+        CSNode node;
+        // add all input and output variables in circuit into the appropriate list above
+        for(int i = 0; i < circuit.getSize(); i++) {
+            node = circuit.getNode(i);
+            if(node instanceof InputVariableNode)
+                inputVariables.add((InputVariableNode)node);
+            else if(node instanceof OutputVariableNode)
+                outputVariables.add((OutputVariableNode)node);
+        }
+
+        // store the original sequences in temporary storage
+        ArrayList<String> originalSequences = new ArrayList<String>(inputVariables.size());
+        for(InputVariableNode inputNode : inputVariables)
+            originalSequences.add(inputNode.getInputSeq().replaceAll("[^01]", "")); // instead of [0, 1, 1, 0], store 0110
+
+        // fill input variable columns to store all possible combinations; along with setting the variables to have
+        // the corresponding input sequences
+        int numInputVariables = inputVariables.size();
+        int[] tempSequence = new int[rowSize];
+        int freq;   // indicates how many 0's or 1's to store before switching to the other
+        int count;  // counts how many 0's or 1's have been stored this cycle
+        boolean storeZero;
+        for(int j = numInputVariables - 1; j >= 0; j--) {
+            count = 0;
+            storeZero = true;
+            freq = (int)Math.pow(2.0, numInputVariables - j - 1);
+            for(int i = 0; i < rowSize; i++) {
+                result.get(i).set(j, Integer.valueOf((storeZero ? 0 : 1)));
+                tempSequence[i] = storeZero ? 0 : 1;
+                if(++count == freq) {
+                    storeZero = !storeZero;
+                    count = 0;
+                }
+            }
+            inputVariables.get(j).setInputSeq(Arrays.copyOf(tempSequence, tempSequence.length));
+        }
+
+        // fill output variables section in array; for each input variable combination, store the values in the output variables
+        circuit.reset();
+
+        int startColumn = inputVariables.size();
+        for(int i = 0; i < rowSize; i++) {
+            updateCircuit();
+            for(int j = startColumn; j < result.get(0).size(); j++)
+                result.get(i).set(j, Integer.valueOf((outputVariables.get(j - startColumn).getValue())));
+        }
+
+        circuit.reset();
+
+        // restore original sequences
+        String seqString;
+        for(int i = 0; i < originalSequences.size(); i++) {
+            seqString = originalSequences.get(i);
+            if(seqString.equals("null"))
+                inputVariables.get(i).setInputSeq(null);
+            else {
+                tempSequence = new int[seqString.length()];
+                for(int n = 0; n < seqString.length(); n++)
+                    tempSequence[n] = Integer.parseInt(String.valueOf(seqString.charAt(n)));
+                inputVariables.get(i).setInputSeq(tempSequence);
+            }
+        }
+
+        return result;
     }
 
-    public String[][] getTransitionTable() throws IllegalStateException {
+    public ArrayList<ArrayList<String>> getTransitionTableData() throws IllegalStateException {
         // double array formatted as:   rows = 2^n where n is number of flip flops,
         //                              cols = 2^m where m is number of input variables
         // each string formatted as: [FF...F, ZZ..Z]    such that each F for a flip flop, each Z for an output variable,
         //                                              both being either 0 or 1, representing their next states
 
         if(!circuit.isSequential())
-            throw new IllegalStateException("This circuit is a combinational circuit, it does not have a transition table.");
+            throw new IllegalStateException("This circuit is a combinational circuit, it does not have a transition table");
+        if(inputNodeNames.size() == 0)
+            throw new IllegalStateException("Input variables are needed to build the transition table");
 
         // temp
         return null;
