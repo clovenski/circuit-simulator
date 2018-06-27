@@ -16,5 +16,5 @@ public abstract class FlipFlop extends CSNode {
         this.outNodeNegated = outNodeNegated;
     }
 
-    public abstract int getValue(FFOutNode invokingOutNode) throws IllegalDFFStateException;
+    protected abstract int getValue(FFOutNode invokingOutNode) throws IllegalDFFStateException;
 }

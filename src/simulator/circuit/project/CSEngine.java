@@ -524,15 +524,11 @@ public class CSEngine {
         ArrayList<InputVariableNode> inputVariables = new ArrayList<InputVariableNode>();
         ArrayList<OutputVariableNode> outputVariables = new ArrayList<OutputVariableNode>();
 
-        CSNode node;
         // add all input and output variables in circuit into the appropriate list above
-        for(int i = 0; i < circuit.getSize(); i++) {
-            node = circuit.getNode(i);
-            if(node instanceof InputVariableNode)
-                inputVariables.add((InputVariableNode)node);
-            else if(node instanceof OutputVariableNode)
-                outputVariables.add((OutputVariableNode)node);
-        }
+        for(String inputNodeName : inputNodeNames)
+            inputVariables.add((InputVariableNode)circuit.getNode(inputNodeName));
+        for(String outputNodeName : outputNodeNames)
+            outputVariables.add((OutputVariableNode)circuit.getNode(outputNodeName));
 
         // store the original sequences in temporary storage
         ArrayList<String> originalSequences = new ArrayList<String>(inputVariables.size());
@@ -590,10 +586,10 @@ public class CSEngine {
         return result;
     }
 
-    public ArrayList<ArrayList<String>> getTransitionTableData() throws IllegalStateException {
-        // double array formatted as:   rows = 2^n where n is number of flip flops,
+    public ArrayList<ArrayList<String>> getTransitionTableData() throws IllegalStateException, IllegalCircuitStateException {
+        // double array formatted as:   rows = 2^n where n is number of D flip flops,
         //                              cols = 2^m where m is number of input variables
-        // each string formatted as: [FF...F, ZZ..Z]    such that each F for a flip flop, each Z for an output variable,
+        // each string formatted as: [FF...F, ZZ..Z]    such that each F for a D flip flop, each Z for an output variable,
         //                                              both being either 0 or 1, representing their next states
 
         if(!circuit.isSequential())
@@ -601,8 +597,92 @@ public class CSEngine {
         if(inputNodeNames.size() == 0)
             throw new IllegalStateException("Input variables are needed to build the transition table");
 
-        // temp
-        return null;
+        int rowSize = (int)Math.pow(2.0, flipFlopNodeNames.size());
+        int colSize = (int)Math.pow(2.0, inputNodeNames.size());
+
+        // initialize result double array to appropriate size
+        ArrayList<ArrayList<String>> result = new ArrayList<ArrayList<String>>(rowSize);
+        for(int i = 0; i < rowSize; i++) {
+            result.add(new ArrayList<String>(colSize));
+            for(int j = 0; j < colSize; j++)
+                result.get(i).add("null");
+        }
+
+        // array lists to store references to appropriate nodes
+        ArrayList<InputVariableNode> inputVariables = new ArrayList<InputVariableNode>();
+        ArrayList<OutputVariableNode> outputVariables = new ArrayList<OutputVariableNode>();
+        ArrayList<DFlipFlop> flipFlops = new ArrayList<DFlipFlop>();
+
+        // add all input, output and D flip flop nodes from circuit to respective list above
+        for(String inputNodeName : inputNodeNames)
+            inputVariables.add((InputVariableNode)circuit.getNode(inputNodeName));
+        for(String outputNodeName : outputNodeNames)
+            outputVariables.add((OutputVariableNode)circuit.getNode(outputNodeName));
+        for(String flipFlopNodeName : flipFlopNodeNames)
+            flipFlops.add((DFlipFlop)circuit.getNode(flipFlopNodeName));
+
+        // reset the circuit, then build the result array
+        circuit.reset();
+
+        // preparation variables
+        String flipFlopStates;
+        FFOutNode targetFFOutNode;
+        String inputStates;
+        InputVariableNode targetInputNode;
+        // update variables
+        String updatePath = "";
+        StringTokenizer tokenizer;
+        CSNode node;
+        // recording variables
+        String elementString1 = ""; // stores the flip flop next state values
+        String elementString2 = ""; // stores the output variable values
+        for(int j = 0; j < colSize; j++) {
+            for(int i = 0; i < rowSize; i++) {
+                // prepare the flip flop present states
+                flipFlopStates = Integer.toBinaryString(i);
+                for(int k = 0; k < flipFlopStates.length(); k++) {
+                    // target flip flop present state node is accessed from right to left in flip flop array list
+                    targetFFOutNode = flipFlops.get(flipFlops.size() - 1 - k).outNode;
+                    // flipFlopStates string is accessed from right to left
+                    targetFFOutNode.value = Integer.parseInt(Character.toString(flipFlopStates.charAt(flipFlopStates.length() - 1 - k)));
+                }
+
+                // prepare the input variables
+                inputStates = Integer.toBinaryString(j);
+                for(int l = 0; l < inputStates.length(); l++) {
+                    // target input node is accessed from right to left in input variables array list
+                    targetInputNode = inputVariables.get(inputVariables.size() - 1 - l);
+                    // inputStates string is accessed from right to left
+                    targetInputNode.value = Integer.parseInt(Character.toString(inputStates.charAt(inputStates.length() - 1 - l)));
+                }
+
+                // update the circuit with prepared node values from above
+                updatePath = circuit.getUpdatePath();
+        
+                tokenizer = new StringTokenizer(updatePath);
+        
+                while(tokenizer.hasMoreTokens()) {
+                    node = circuit.getNode(Integer.valueOf(tokenizer.nextToken()));
+                    // do not update input variables, since doing so overwrites the desired value to be used
+                    if(!(node instanceof InputVariableNode))
+                        node.updateValue();
+                }
+
+                // record the results
+                for(int n = 0; n < flipFlops.size(); n++)
+                    elementString1 += String.valueOf(flipFlops.get(n).getValue());
+                for(int m = 0; m < outputVariables.size(); m++)
+                    elementString2 += String.valueOf(outputVariables.get(m).getValue());
+
+                result.get(i).set(j, elementString1 + ", " + elementString2);
+
+                // reset for next loop iteration
+                circuit.reset();
+                updatePath = elementString1 = elementString2 = "";
+            }
+        }
+
+        return result;
     }
 
     public String[] getCircuitNodeNames() {

@@ -17,7 +17,7 @@ public class DFlipFlop extends FlipFlop implements VariableInput {
             inputNode = null;
     }
 
-    public int getValue(FFOutNode invokingOutNode) throws IllegalDFFStateException {
+    protected int getValue(FFOutNode invokingOutNode) throws IllegalDFFStateException {
         if(invokingOutNode == outNode)
             return value;
         else if(invokingOutNode == outNodeNegated)

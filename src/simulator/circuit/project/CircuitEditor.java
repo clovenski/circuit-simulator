@@ -324,6 +324,7 @@ public class CircuitEditor {
         }
     }
 
+    // TO-DO: upon setting an input seq, loop back to this menu rather than returning
     private void setInputSeq() {
         int userInput;
         int inputNodeIndex;

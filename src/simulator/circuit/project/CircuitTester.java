@@ -3,6 +3,8 @@ package simulator.circuit.project;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import simulator.circuit.project.CSGraph.IllegalCircuitStateException;
+
 public class CircuitTester {
     private CSEngine engine;
     private String circuitName;
@@ -193,7 +195,18 @@ public class CircuitTester {
     }
 
     private void printTransitionTable() {
+        //testing
+        ArrayList<ArrayList<String>> data = null;
+        try {
+            data = engine.getTransitionTableData();
+        } catch(IllegalCircuitStateException icse) {
 
+        }
+        for(int i = 0; i < data.size(); i++) {
+            for(int j = 0; j < data.get(0).size(); j++)
+                System.out.print(data.get(i).get(j) + " ");
+            System.out.println();
+        }
     }
 
     private void printTruthTable() {
