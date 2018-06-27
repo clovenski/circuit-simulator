@@ -195,13 +195,33 @@ public class CircuitTester {
     }
 
     private void printTransitionTable() {
-        //testing
-        ArrayList<ArrayList<String>> data = null;
+        ArrayList<ArrayList<String>> data;
+        String[] flipFlopNodeNames;
+        String[] outputNodeNames;
+        int fieldWidth1; // field width of PS
+        int fieldWidth2; // field width of NS
+
         try {
             data = engine.getTransitionTableData();
         } catch(IllegalCircuitStateException icse) {
-
+            System.err.println(icse.getMessage());
+            return;
+        } catch(Exception e) {
+            System.err.println(e.getMessage());
+            return;
         }
+
+        flipFlopNodeNames = engine.getFlipFlopNodeNames();
+        outputNodeNames = engine.getOutputNodeNames();
+
+        fieldWidth1 = Math.max(data.get(0).get(0).length(), 2);
+        fieldWidth2 = data.get(0).get(1).length();
+
+        // print headers
+        System.out.printf("%" + fieldWidth1 + "s | %s", "PS", "NS");
+        // continue here
+
+        // for testing
         for(int i = 0; i < data.size(); i++) {
             for(int j = 0; j < data.get(0).size(); j++)
                 System.out.print(data.get(i).get(j) + " ");

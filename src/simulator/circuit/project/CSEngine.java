@@ -588,9 +588,11 @@ public class CSEngine {
 
     public ArrayList<ArrayList<String>> getTransitionTableData() throws IllegalStateException, IllegalCircuitStateException {
         // double array formatted as:   rows = 2^n where n is number of D flip flops,
-        //                              cols = 2^m where m is number of input variables
-        // each string formatted as: [FF...F, ZZ..Z]    such that each F for a D flip flop, each Z for an output variable,
-        //                                              both being either 0 or 1, representing their next states
+        //                              cols = 1 + 2^m where m is number of input variables
+        // first column represents present state combination;
+        // for every column after that:
+        //      each string formatted as: [FF...F, ZZ..Z]   such that each F for a D flip flop, each Z for an output variable,
+        //                                                  both being either 0 or 1, representing their next states
 
         if(!circuit.isSequential())
             throw new IllegalStateException("This circuit is a combinational circuit, it does not have a transition table");
@@ -598,7 +600,7 @@ public class CSEngine {
             throw new IllegalStateException("Input variables are needed to build the transition table");
 
         int rowSize = (int)Math.pow(2.0, flipFlopNodeNames.size());
-        int colSize = (int)Math.pow(2.0, inputNodeNames.size());
+        int colSize = 1 + (int)Math.pow(2.0, inputNodeNames.size());
 
         // initialize result double array to appropriate size
         ArrayList<ArrayList<String>> result = new ArrayList<ArrayList<String>>(rowSize);
@@ -621,12 +623,16 @@ public class CSEngine {
         for(String flipFlopNodeName : flipFlopNodeNames)
             flipFlops.add((DFlipFlop)circuit.getNode(flipFlopNodeName));
 
+        
+
         // reset the circuit, then build the result array
         circuit.reset();
 
         // preparation variables
-        String flipFlopStates;
-        FFOutNode targetFFOutNode;
+        LinkedList<String> presentStates = new LinkedList<String>(); // queue to store the values to set for present states
+        String flipFlopStates;  // string to store binary number of row number; starting at zero
+        String temp = "";       // temp storage to store into result[i][0]: the present state values; temp used again for reference
+        DFlipFlop targetDFFNode;
         String inputStates;
         InputVariableNode targetInputNode;
         // update variables
@@ -636,19 +642,38 @@ public class CSEngine {
         // recording variables
         String elementString1 = ""; // stores the flip flop next state values
         String elementString2 = ""; // stores the output variable values
-        for(int j = 0; j < colSize; j++) {
+
+        // prepare first column with all combinations of present state values
+        for(int n = 0; n < flipFlops.size(); n++)
+            presentStates.add("0");
+        for(int i = 0; i < rowSize; i++) {
+            flipFlopStates = Integer.toBinaryString(i);
+            for(int k = 0; k < flipFlopStates.length(); k++) {
+                presentStates.add(Character.toString(flipFlopStates.charAt(k)));
+                presentStates.remove();
+            }
+            
+            for(int l = 0; l < flipFlops.size(); l++) {
+                temp += presentStates.remove();
+                presentStates.add("0");
+            }
+
+            result.get(i).set(0, temp);
+            temp = "";
+        }
+
+        for(int j = 1; j < colSize; j++) {
             for(int i = 0; i < rowSize; i++) {
                 // prepare the flip flop present states
-                flipFlopStates = Integer.toBinaryString(i);
-                for(int k = 0; k < flipFlopStates.length(); k++) {
-                    // target flip flop present state node is accessed from right to left in flip flop array list
-                    targetFFOutNode = flipFlops.get(flipFlops.size() - 1 - k).outNode;
-                    // flipFlopStates string is accessed from right to left
-                    targetFFOutNode.value = Integer.parseInt(Character.toString(flipFlopStates.charAt(flipFlopStates.length() - 1 - k)));
+                for(int k = 0; k < flipFlops.size(); k++) {
+                    targetDFFNode = flipFlops.get(k);
+                    temp = result.get(i).get(0);
+                    assert flipFlops.size() == temp.length();
+                    targetDFFNode.value = Integer.parseInt(Character.toString(temp.charAt(k)));
                 }
 
                 // prepare the input variables
-                inputStates = Integer.toBinaryString(j);
+                inputStates = Integer.toBinaryString(j - 1);
                 for(int l = 0; l < inputStates.length(); l++) {
                     // target input node is accessed from right to left in input variables array list
                     targetInputNode = inputVariables.get(inputVariables.size() - 1 - l);
