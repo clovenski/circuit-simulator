@@ -699,7 +699,10 @@ public class CSEngine {
                 for(int m = 0; m < outputVariables.size(); m++)
                     elementString2 += String.valueOf(outputVariables.get(m).getValue());
 
-                result.get(i).set(j, elementString1 + ", " + elementString2);
+                if(elementString2.length() > 0)
+                    result.get(i).set(j, elementString1 + ", " + elementString2);
+                else
+                    result.get(i).set(j, elementString1);
 
                 // reset for next loop iteration
                 circuit.reset();

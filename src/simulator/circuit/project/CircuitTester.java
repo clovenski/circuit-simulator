@@ -1,6 +1,7 @@
 package simulator.circuit.project;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Scanner;
 
 import simulator.circuit.project.CSGraph.IllegalCircuitStateException;
@@ -198,8 +199,12 @@ public class CircuitTester {
         ArrayList<ArrayList<String>> data;
         String[] flipFlopNodeNames;
         String[] outputNodeNames;
+        String[] inputNodeNames;
+        String[] inputNodeCombs; // store the combinations of the input variable values
+        String temp = ""; // will store the header for input variable combinations
         int fieldWidth1; // field width of PS
         int fieldWidth2; // field width of NS
+        int nextStateSecLength; // stores how wide the next state section is in the table
 
         try {
             data = engine.getTransitionTableData();
@@ -213,20 +218,86 @@ public class CircuitTester {
 
         flipFlopNodeNames = engine.getFlipFlopNodeNames();
         outputNodeNames = engine.getOutputNodeNames();
+        inputNodeNames = engine.getInputNodeNames();
 
-        fieldWidth1 = Math.max(data.get(0).get(0).length(), 2);
+        inputNodeCombs = getBinaryNumSeq(inputNodeNames.length);
+
+        // print format of PS and NS and input combinations
+        System.out.print("\nFormat of PS: ");
+        for(String nodeName : flipFlopNodeNames)
+            System.out.print(nodeName + " ");
+        System.out.println();
+        System.out.print("Format of NS: ");
+        for(String nodeName : flipFlopNodeNames)
+            System.out.print(nodeName + " ");
+        if(outputNodeNames.length != 0) {
+            System.out.print(", ");
+            for(String nodeName : outputNodeNames)
+                System.out.print(nodeName + " ");
+        }
+        System.out.println();
+        System.out.print("Format of input combinations: ");
+        for(String nodeName : inputNodeNames)
+            System.out.print(nodeName + " ");
+        System.out.println("\n");
+
+        fieldWidth1 = Math.max(data.get(0).get(0).length(), 2) + 1;
         fieldWidth2 = data.get(0).get(1).length();
+        nextStateSecLength = (fieldWidth2 + 3) * inputNodeCombs.length;
 
         // print headers
-        System.out.printf("%" + fieldWidth1 + "s | %s", "PS", "NS");
-        // continue here
+        System.out.printf("%" + fieldWidth1 + "s | %" + (nextStateSecLength / 2) + "s\n", "PS", "NS"); // print top header: PS | NS
+        System.out.printf("%" + fieldWidth1 + "s | %" + (nextStateSecLength / 2) + "s\n", "", "input"); // print second row
+        for(String comb : inputNodeCombs)
+            temp += String.format("| %-" + fieldWidth2 + "s ", comb);               // prepare input combos string, then
+        System.out.printf("%" + fieldWidth1 + "s %s\n", "", temp);                  // print third row: input combos
+        // print header and table separator (dashes and pluses)
+        for(int i = 0; i < fieldWidth1 + 1; i++)
+            System.out.print("-");
+        for(int i = 0; i < inputNodeCombs.length; i++) {
+            System.out.print("+");
+            for(int j = 0; j < fieldWidth2 + 2; j++)
+                System.out.print("-");
+        }
+        System.out.println();
 
-        // for testing
+        // print table
         for(int i = 0; i < data.size(); i++) {
-            for(int j = 0; j < data.get(0).size(); j++)
-                System.out.print(data.get(i).get(j) + " ");
+            System.out.printf("%" + fieldWidth1 + "s ", data.get(i).get(0));
+            for(int j = 1; j < data.get(0).size(); j++)
+                System.out.printf("| %" + fieldWidth2 + "s ", data.get(i).get(j));
             System.out.println();
         }
+
+        System.out.println("\nPress [ENTER] to return");
+        inputSource.nextLine();
+    }
+
+    private String[] getBinaryNumSeq(int bits) {
+        String[] result = new String[(int)Math.pow(2.0, bits)];
+        LinkedList<String> queue = new LinkedList<String>();
+        for(int i = 0; i < bits; i++)
+            queue.add("0");
+        
+        String binaryNum;
+        String temp = "";
+        for(int i = 0; i < result.length; i++) {
+            binaryNum = Integer.toBinaryString(i);
+            for(int n = 0; n < binaryNum.length(); n++) {
+                queue.add(Character.toString(binaryNum.charAt(n)));
+                queue.remove();
+            }
+
+            for(int m = 0; m < bits; m++) {
+                temp += queue.remove();
+                queue.add("0");
+            }
+
+            result[i] = temp;
+            temp = "";
+        }
+
+        return result;
     }
 
     private void printTruthTable() {
