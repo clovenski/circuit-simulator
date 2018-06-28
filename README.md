@@ -97,10 +97,16 @@ Some remarks on using the program
 + adding a connection to nodes that can only have one input reference, such as an output variable node, will disconnect the previous connection to that node, if any
 + if you remove a connection between a node and its inverter, that inverter will be removed along with all of the inverter's connections; this effect also occurs recursively, meaning if that inverter also had its own inverter, the latter inverter is removed as well, and so on
 + truth tables are printed for combinational circuits (ones without flip flops), and transition tables are printed for sequential circuits (ones with flip flops)
++ try to keep save file name 20 characters or below; any greater will cause formatting issue in main menu
++ try to keep all node names short; keep in mind that these names affect the formatting in some info printing, such as the truth table for combinational circuits
 
 ## Example
 
-Please check out the [example](example/) folder in this repository as it provides a nice demonstration of using this program to solve the seven segment display problem.
+Below is an example that solves the seven segment display problem using a saved circuit created by this program.
+
+Check out the [example](example/) folder for more info.
+
+![Alt text](example/captures/7seg_example.gif)
 
 Here are some examples of the actual program itself
 

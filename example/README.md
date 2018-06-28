@@ -1,4 +1,4 @@
-## Example
+# Example
 
 The seven segment display problem involves designing a circuit that will implement displaying the numbers 0 through 9 with seven segments arranged in a way that combinations of those segments being turned "on" will present the appropriate number.
 
@@ -25,7 +25,7 @@ Now `CSExample.java` was programmed to expect a specific save file (one that I h
 ![Alt text](captures/7seg_format.PNG)
 
 + according to the format above, name your output variables "a" through "g" appropriately
-+ ensure that your circuit is ready to test
++ ensure that your input sequences combined represent the appropriate binary number to show for each clock tick
 + save your circuit with the file name "SevenSegmentExample" or whatever you like
 + copy the file into the "cs-saves" folder located inside this directory (it should be a folder that already includes "SevenSegmentExample")
 + if you named your file something other than "SevenSegmentExample" then use your circuit file name as an argument when running the example program

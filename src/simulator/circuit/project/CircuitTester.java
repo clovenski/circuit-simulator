@@ -242,11 +242,11 @@ public class CircuitTester {
         System.out.println("\n");
 
         fieldWidth1 = Math.max(data.get(0).get(0).length(), 2) + 1;
-        fieldWidth2 = data.get(0).get(1).length();
+        fieldWidth2 = Math.max(data.get(0).get(1).length(), inputNodeNames.length);
         nextStateSecLength = (fieldWidth2 + 3) * inputNodeCombs.length;
 
         // print headers
-        System.out.printf("%" + fieldWidth1 + "s | %" + (nextStateSecLength / 2) + "s\n", "PS", "NS"); // print top header: PS | NS
+        System.out.printf("%" + fieldWidth1 + "s | %" + (nextStateSecLength / 2) + "s\n", "PS", "NS");  // print top header: PS | NS
         System.out.printf("%" + fieldWidth1 + "s | %" + (nextStateSecLength / 2) + "s\n", "", "input"); // print second row
         for(String comb : inputNodeCombs)
             temp += String.format("| %-" + fieldWidth2 + "s ", comb);               // prepare input combos string, then

@@ -7,6 +7,7 @@ public abstract class CSNode implements Serializable {
     protected int value;
     protected String name;
     protected int trackNum;
+    // dev note: try to keep node type at most 6 characters, greater than 6 will cause formatting issues in menus
     private final String NODE_TYPE;
     private static final long serialVersionUID = 1L;
     

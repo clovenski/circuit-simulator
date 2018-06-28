@@ -623,8 +623,6 @@ public class CSEngine {
         for(String flipFlopNodeName : flipFlopNodeNames)
             flipFlops.add((DFlipFlop)circuit.getNode(flipFlopNodeName));
 
-        
-
         // reset the circuit, then build the result array
         circuit.reset();
 

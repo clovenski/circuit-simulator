@@ -104,6 +104,7 @@ public class CircuitSimulator {
 
     private void printCircuitInfo() {
         int[] circuitStatus = engine.getCircuitStatus();
+        String circuitType = engine.isCircuitSequential() ? "Sequential" : "Combinational";
         int index = 0;
         // circuit is ready to test if a sequence exists in the circuit
         boolean testReady = circuitStatus[1] > 0;
@@ -112,6 +113,7 @@ public class CircuitSimulator {
         System.out.printf("%23s: %s\n", "Circuit name", circuitName);
         System.out.printf("%23s: %d\n", "Number of nodes", engine.getCircuitSize());
         System.out.printf("%23s: %s\n", "Ready to test", (testReady ? "Yes" : "No"));
+        System.out.printf("%23s: %s\n", "Circuit type", circuitType);
         // print number of nodes for each type of node
         System.out.printf("%-15s : %d\n", "Input Nodes", circuitStatus[index++]);
         System.out.printf("%-15s : %d\n", "Sequences", circuitStatus[index++]);

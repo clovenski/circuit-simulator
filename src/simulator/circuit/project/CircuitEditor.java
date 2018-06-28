@@ -324,7 +324,6 @@ public class CircuitEditor {
         }
     }
 
-    // TO-DO: upon setting an input seq, loop back to this menu rather than returning
     private void setInputSeq() {
         int userInput;
         int inputNodeIndex;
@@ -334,23 +333,27 @@ public class CircuitEditor {
         String[] inputNodeNames = engine.getInputNodeNames();
         
         if(circuitInputSeqStatus.length != 0) {
-            System.out.println("\nCS > Main Menu > Circuit Editor > Set Input Sequence");
+            do {
+                System.out.println("\nCS > Main Menu > Circuit Editor > Set Input Sequence");
 
-            for(String status : circuitInputSeqStatus)
-                System.out.println(status);
+                for(String status : circuitInputSeqStatus)
+                    System.out.println(status);
 
-            System.out.println((circuitInputSeqStatus.length + 1) + ". Enter this number to return");
-            System.out.println();
+                System.out.println((circuitInputSeqStatus.length + 1) + ". Enter this number to return");
+                System.out.println();
 
-            userInput = CSUserInterface.getUserIntInput(prompt, circuitInputSeqStatus.length + 1, inputSource);
-            if(userInput == (circuitInputSeqStatus.length + 1))
-                return;
+                userInput = CSUserInterface.getUserIntInput(prompt, circuitInputSeqStatus.length + 1, inputSource);
+                if(userInput == (circuitInputSeqStatus.length + 1))
+                    return;
 
-            inputNodeIndex = userInput - 1;
-            sequence = CSUserInterface.getUserInputSeq("Enter a sequence of 0's and 1's separated by spaces, anything other than a zero or one will be ignored: ", inputSource);
+                inputNodeIndex = userInput - 1;
+                sequence = CSUserInterface.getUserInputSeq("Enter a sequence of 0's and 1's separated by spaces, anything other than a zero or one will be ignored: ", inputSource);
 
-            engine.setInputSeq(inputNodeNames[inputNodeIndex], sequence);
-            System.out.println("\nSuccessfully set a new input sequence");
+                engine.setInputSeq(inputNodeNames[inputNodeIndex], sequence);
+                System.out.println("\nSuccessfully set a new input sequence");
+
+                circuitInputSeqStatus = engine.getCircuitInputSeqStatus();
+            } while(true);
         } else {
             System.out.println("\nThere are no input nodes to set a sequence to\n");
         }
