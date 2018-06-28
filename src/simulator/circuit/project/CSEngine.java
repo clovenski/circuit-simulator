@@ -880,4 +880,13 @@ public class CSEngine {
 
         trackedNodes.sort(new CSNodeTrackNumComparator());
     }
+
+    public void newCircuit() {
+        circuit = new CSGraph();
+        inputNodeNames.clear();
+        outputNodeNames.clear();
+        flipFlopNodeNames.clear();
+        invertedNodes.clear();
+        trackedNodes.clear();
+    }
 }

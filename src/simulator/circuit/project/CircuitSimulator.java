@@ -10,11 +10,13 @@ public class CircuitSimulator {
     private Scanner inputSource;
     private String circuitName;
     private CSEngine engine;
+    private boolean circuitIsNew;
     private boolean circuitEdited;
 
     public CircuitSimulator() {
         engine = new CSEngine();
         circuitName = "new-circuit";
+        circuitIsNew = true;
         circuitEdited = false;
         inputSource = new Scanner(System.in);
     }
@@ -26,22 +28,26 @@ public class CircuitSimulator {
             circuit = CSFileIO.readSaveFile(fileName);
             engine = new CSEngine(circuit);
             circuitName = fileName;
+            circuitIsNew = false;
             System.out.println("Successfully loaded circuit: " + fileName + ".");
         } catch(FileNotFoundException fnfe) {
             System.err.println("Error: could not find saved circuit named " + fileName + ".");
             System.err.println("Creating a new circuit . . .");
             engine = new CSEngine();
             circuitName = "new-circuit";
+            circuitIsNew = true;
         } catch(ClassCastException cce) {
             System.err.println("Error: could not recognize this file");
             System.err.println("Creating a new circuit . . .");
             engine = new CSEngine();
             circuitName = "new-circuit";
+            circuitIsNew = true;
         } catch(Exception e) {
             System.err.println("Error occurred: " + e.getMessage());
             System.err.println("Creating a new circuit . . .");
             engine = new CSEngine();
             circuitName = "new-circuit";
+            circuitIsNew = true;
         }
 
         System.out.println();
@@ -56,11 +62,13 @@ public class CircuitSimulator {
         File[] files;
         
         // add options to main menu
-        options.add("Check the status of this circuit");
+        options.add("Check status of this circuit");
         options.add("Edit this circuit");
         options.add("Test this circuit");
-        options.add("Save this circuit");
-        options.add("Load a circuit");
+        options.add("Save");
+        options.add("Save as");
+        options.add("Load");
+        options.add("New");
         options.add("Exit");
 
         // print welcome message
@@ -95,9 +103,14 @@ public class CircuitSimulator {
                             break;
                 case 4:     saveCircuit();
                             break;
-                case 5:     loadCircuit();
+                case 5:     saveCircuitAs();
                             break;
-                case 6:     return; // exit the program
+                case 6:     loadCircuit();
+                            break;
+                case 7:     newCircuit();
+                            break;
+                case 8:     exit();
+                            return; // exit the program
             }
         } while(true);
     }
@@ -135,12 +148,27 @@ public class CircuitSimulator {
     }
 
     private void saveCircuit() {
+        if(circuitIsNew) {
+            saveCircuitAs();
+            return;
+        }
+
+        try {
+            engine.saveCircuit(circuitName);
+            circuitEdited = false;
+            System.out.println("\nSuccessfully saved the circuit");
+        } catch(Exception e) {
+            System.err.println("\nUnknown error: " + e.getMessage());
+        }
+    }
+
+    private void saveCircuitAs() {
         File[] files = CSFileIO.getSaveDir().listFiles();
         String fileName;
         int userInput;
         boolean overwriting = false;
 
-        System.out.println("CS > Main Menu > Save");
+        System.out.println("\nCS > Main Menu > Save As");
 
         fileName = CSUserInterface.getUserStringInput("Save as: ", inputSource);
 
@@ -159,8 +187,9 @@ public class CircuitSimulator {
                 try {
                     engine.saveCircuit(fileName);
                     circuitEdited = false;
-                    System.out.println("\nSuccessfully saved the circuit");
                     circuitName = fileName;
+                    circuitIsNew = false;
+                    System.out.println("\nSuccessfully saved the circuit");
                 } catch(Exception e) {
                     System.err.println("\nUnknown error: " + e.getMessage());
                 }
@@ -170,8 +199,9 @@ public class CircuitSimulator {
             try {
                 engine.saveCircuit(fileName);
                 circuitEdited = false;
-                System.out.println("\nSuccessfully saved the circuit");
                 circuitName = fileName;
+                circuitIsNew = false;
+                System.out.println("\nSuccessfully saved the circuit");
             } catch(Exception e) {
                 System.err.println("\nUnknown error: " + e.getMessage());
             }
@@ -210,16 +240,37 @@ public class CircuitSimulator {
         try {
             engine.loadCircuit(fileName);
             circuitName = fileName;
+            circuitIsNew = false;
             circuitEdited = false;
             System.out.println("\nSuccessfully loaded file " + fileName);
         } catch(ClassCastException cce) {
             System.err.println("\nCannot read from the file " + fileName);
         } catch(Exception e) {
-            System.err.println("\nUnknown error: please try again");
+            System.err.println("\nUnknown error: " + e.getMessage());
         }
     }
 
-    public void exit() {
+    private void newCircuit() {
+        int userInput;
+
+        if(circuitEdited) {
+            System.out.println("You have opted to edit your circuit and haven't saved since then.\n" +
+                                "Any unsaved changes will be lost.\n");
+
+            userInput = CSUserInterface.getUserIntInput("Enter 1 to save, or 2 to continue without saving: ", 2, inputSource);
+            if(userInput == 1)
+                saveCircuit();
+        }
+
+        engine.newCircuit();
+        circuitName = "new-circuit";
+        circuitIsNew = true;
+        circuitEdited = false;
+
+        System.out.println("\nSuccessfully created new circuit");
+    }
+
+    private void exit() {
         int userInput;
 
         if(circuitEdited) {
@@ -243,6 +294,5 @@ public class CircuitSimulator {
             program = new CircuitSimulator();
 
         program.start();
-        program.exit();
     }
 }

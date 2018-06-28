@@ -30,7 +30,7 @@ If you already have a saved circuit from this program, running the program with 
 
 This tree represents your available options throughout the program
 
-```
+```txt
 Main Menu
 |
 +-- check circuit status
@@ -75,8 +75,10 @@ Main Menu
 |   +-- run test
 |   \-- print truth or transition table
 |
-+-- save circuit
-+-- load circuit
++-- save
++-- save as
++-- load
++-- new circuit
 \-- exit program
 ```
 
@@ -90,6 +92,8 @@ So the idea is:
 
 The program will then output the value of each tracked node at each clock tick.
 
+Alternatively, you can print your circuit's truth table or transition table, depending on the type of your circuit. These tables provide very useful information about your circuit and can be used for quick testing as it covers all the combinations of your input variable values while not requiring any input sequences to be set.
+
 You can also save your circuits, and the save files will be located in a folder called "cs-saves", which will be in the build folder if you followed the instructions above, otherwise the folder will appear in the directory in which you inputted the command to run the program.
 
 Some remarks on using the program
@@ -99,6 +103,7 @@ Some remarks on using the program
 + truth tables are printed for combinational circuits (ones without flip flops), and transition tables are printed for sequential circuits (ones with flip flops)
 + try to keep save file name 20 characters or below; any greater will cause formatting issue in main menu
 + try to keep all node names short; keep in mind that these names affect the formatting in some info printing, such as the truth table for combinational circuits
++ editing your tracked nodes in any way is not considered a modification to your circuit, so be sure to save if you'd like to keep those changes as there would be no prompt to warn you
 
 ## Example
 
