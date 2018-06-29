@@ -337,10 +337,14 @@ public class CircuitTester {
         System.out.println();
 
         // print dashes to separate headers from data
-        int dashesNeeded = fieldWidth * (inputNodeNames.length + outputNodeNames.length) + 3;
-        for(int i = 0; i < dashesNeeded; i++)
+        int dashesNeeded1 = fieldWidth * inputNodeNames.length;     // stores length of input variables section (left section) of table
+        int dashesNeeded2 = fieldWidth * outputNodeNames.length;    // stores length of output variables section (right section) of table
+        for(int i = 0; i < dashesNeeded1; i++)
             System.out.print("-");
-        System.out.println();
+        System.out.print("-+-");
+        for(int i = 0; i < dashesNeeded2; i++)
+            System.out.print("-");
+        System.out.println("-");
 
         // print the table
         for(int i = 0; i < truthTableData.size(); i++) {

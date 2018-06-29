@@ -7,14 +7,17 @@ public abstract class CSNode implements Serializable {
     protected int value;
     protected String name;
     protected int trackNum;
-    // dev note: try to keep node type at most 6 characters, greater than 6 will cause formatting issues in menus
+    // node type can be at most 6 characters, for formatting in menus
     private final String NODE_TYPE;
     private static final long serialVersionUID = 1L;
     
     public CSNode(String name, String type) {
         value = 0;
         this.name = name;
-        NODE_TYPE = type;
+        if(type.length() <= 6)
+            NODE_TYPE = type;
+        else
+            NODE_TYPE = type.substring(0, 6);
         trackNum = 0;
     }
 
