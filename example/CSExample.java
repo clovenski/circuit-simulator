@@ -10,7 +10,10 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import simulator.circuit.project.*;
+import simulator.circuit.project.CSGraph;
+import simulator.circuit.project.CSEngine;
+import simulator.circuit.project.CSFileIO;
+import simulator.circuit.project.OutputVariableNode;
 
 public class CSExample extends JPanel implements ActionListener {
     private static final long serialVersionUID = 1L;
