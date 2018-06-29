@@ -115,8 +115,14 @@ Check out the [example](example/) folder for more info.
 
 Here are some examples of the actual program itself
 
-![Alt text](example/captures/testing_circuit.gif)
+Nodes and connections examples:
 
-![Alt text](example/captures/add_node.gif)
+![Alt text](example/captures/nodes_example.PNG) ![Alt text](example/captures/connections_example.PNG)
 
-![Alt text](example/captures/connections.gif)
+Testing circuit example:
+
+![Alt text](example/captures/test_circuit_example.PNG)
+
+Truth and transition table examples:
+
+![Alt text](example/captures/truth_table_example.PNG) ![Alt text](example/captures/trans_table_example.PNG)

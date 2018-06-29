@@ -222,6 +222,9 @@ public class CircuitTester {
 
         inputNodeCombs = getBinaryNumSeq(inputNodeNames.length);
 
+        // print name of circuit
+        System.out.println("Transition table for circuit: " + circuitName);
+
         // print format of PS and NS and input combinations
         System.out.print("\nFormat of PS: ");
         for(String nodeName : flipFlopNodeNames)
@@ -326,6 +329,9 @@ public class CircuitTester {
             if(name.length() > fieldWidth)
                 fieldWidth = name.length();
         fieldWidth = fieldWidth + 1;
+
+        // print name of circuit
+        System.out.println("Truth table for circuit: " + circuitName);
 
         // print input and output nodes
         System.out.println();
