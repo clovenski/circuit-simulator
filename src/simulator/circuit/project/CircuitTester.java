@@ -98,6 +98,7 @@ public class CircuitTester {
         String prompt = "Enter the number of the node to track: ";
         int nodeIndex;
         String[] nodeNames = engine.getCircuitNodeNames();
+        int fieldWidth; // will store longest node name length
 
         if(nodeNames.length == 0) {
             System.out.println("\nThere are no nodes in the circuit to track");
@@ -106,9 +107,11 @@ public class CircuitTester {
 
         System.out.println("\nCS > Main Menu > Circuit Tester > Edit Tracked Nodes > Track Node");
 
+        // print list of nodes; 4 nodes per row
+        fieldWidth = engine.getLongestNameLength();
         for(int i = 1; i <= nodeNames.length; i++) {
-            System.out.print(i + ". " + nodeNames[i - 1] + " ");
-            if(i % 5 == 0 && i != nodeNames.length)
+            System.out.printf("%3d. %-" + fieldWidth + "s ", i, nodeNames[i - 1]);
+            if(i % 4 == 0 && i != nodeNames.length)
                 System.out.println();
         }
 
@@ -119,7 +122,7 @@ public class CircuitTester {
             engine.trackNode(nodeIndex);
             System.out.println("\nSuccessfully tracked the node");
         } catch(IllegalArgumentException iae) {
-            System.err.println(iae.getMessage());
+            System.err.println("\n" + iae.getMessage());
         } catch(Exception e) {
             System.err.println("\nUnknown error: " + e.getMessage());
         }
@@ -129,6 +132,7 @@ public class CircuitTester {
         String prompt = "Enter the number of the node to untrack: ";
         int nodeIndex;
         String[] trackedNodes = engine.getTrackedNodeNames();
+        int fieldWidth; // will store longest tracked node name length
 
         if(trackedNodes.length == 0) {
             System.out.println("\nThere are no tracked nodes in this circuit");
@@ -137,9 +141,11 @@ public class CircuitTester {
 
         System.out.println("\nCS > Main Menu > Circuit Tester > Edit Tracked Nodes > Untrack Node");
 
+        // print tracked node names, 4 nodes per row
+        fieldWidth = engine.getLongestTrackedNameLength();
         for(int i = 1; i <= trackedNodes.length; i++) {
-            System.out.print(i + ". " + trackedNodes[i - 1] + " ");
-            if(i % 5 == 0 && i != trackedNodes.length)
+            System.out.printf("%3d. %-" + fieldWidth + "s ", i, trackedNodes[i - 1]);
+            if(i % 4 == 0 && i != trackedNodes.length)
                 System.out.println();
         }
 
@@ -150,7 +156,7 @@ public class CircuitTester {
             engine.untrackNode(nodeIndex);
             System.out.println("\nSuccessfully untracked the node");
         } catch(IllegalArgumentException iae) {
-            System.err.println(iae.getMessage());
+            System.err.println("\n" + iae.getMessage());
         } catch(Exception e) {
             System.err.println("\nUnknown error: " + e.getMessage());
         }
@@ -159,15 +165,16 @@ public class CircuitTester {
     private void printCircuitTest() {
         String[] trackedNodeNames;
         int[] trackedNodeValues;
-        int headerWidth = engine.getLongestNodeNameLength();
-        int testCycles = engine.getLongestSequenceLength();
+        int headerWidth = engine.getLongestTrackedNameLength();
+        int testCycles = engine.getLongestInputSeqLength();
 
+        // if the longest input sequence is zero; in other words there are no input sequences
         if(testCycles == 0) {
             System.out.println("\nThere are no input sequences to test this circuit with");
             return;
         }
 
-        // if longest node name length is zero, then there are no tracked nodes
+        // if header width is zero, then there are no tracked nodes
         if(headerWidth == 0) {
             System.out.println("\nTrack a node in order to display its values in the test");
             return;
@@ -175,9 +182,16 @@ public class CircuitTester {
 
         System.out.println("Testing circuit: " + circuitName + "\n");
 
+        // print headers, names of the tracked nodes
         trackedNodeNames = engine.getTrackedNodeNames();
         for(String trackedNodeName : trackedNodeNames)
             System.out.printf("%" + (headerWidth + 1) + "s", trackedNodeName);
+        System.out.println();
+
+        // print header and test data separator
+        int tableWidth = (headerWidth + 1) * trackedNodeNames.length + 1;
+        for(int i = 0; i < tableWidth; i++)
+            System.out.print("-");
         System.out.println();
         
         for(int i = 0; i < testCycles; i++) {
@@ -188,8 +202,6 @@ public class CircuitTester {
         }
 
         engine.resetCircuit();
-
-        // can implement feature [write test results to file] here
 
         System.out.println("\nPress [ENTER] to return");
         inputSource.nextLine();

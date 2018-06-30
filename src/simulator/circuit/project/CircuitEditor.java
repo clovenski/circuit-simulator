@@ -68,6 +68,7 @@ public class CircuitEditor {
         int userInput;
         String[] nodeNames;
         String[] nodeTypes;
+        int fieldWidth;
         ArrayList<String> options = new ArrayList<String>();
         options.add("Add a node");
         options.add("Remove a node");
@@ -89,9 +90,10 @@ public class CircuitEditor {
                 System.out.println("------------------------------------");
 
             } else { // print node names in a condensed list, without their type
+                fieldWidth = engine.getLongestNameLength();
                 for(int i = 1; i <= nodeNames.length; i++) {
-                    System.out.print(i + ". " + nodeNames[i - 1] + "  ");
-                    if(i % 5 == 0 && i != nodeNames.length)
+                    System.out.printf("%3d. %-" + fieldWidth + "s ", i, nodeNames[i - 1]);
+                    if(i % 4 == 0 && i != nodeNames.length)
                         System.out.println();
                 }
 
@@ -235,6 +237,7 @@ public class CircuitEditor {
 
     private void editConnections() {
         int userInput;
+        int fieldWidth;
         String[] nodeNames;
         String[] nodeTypes;
         String[] circuitConnections;
@@ -248,9 +251,10 @@ public class CircuitEditor {
             System.out.printf("%17s connections:\n\n", circuitName);
 
             nodeNames = engine.getCircuitNodeNames();
+            fieldWidth = engine.getLongestNameLength();
             for(int i = 1; i <= nodeNames.length; i++) {
-                System.out.print(i + ". " + nodeNames[i - 1] + "  ");
-                if(i % 5 == 0 && i != nodeNames.length)
+                System.out.printf("%3d. %-" + fieldWidth + "s ", i, nodeNames[i - 1]);
+                if(i % 4 == 0 && i != nodeNames.length)
                     System.out.println();
             }
 
@@ -307,8 +311,8 @@ public class CircuitEditor {
         int sourceNodeIndex;
         int targetNodeIndex;
         int circuitSize = engine.getCircuitSize();
-        if(circuitSize == 0)
-            throw new IllegalArgumentException("There are no nodes for you to remove");
+        if(circuitSize <= 1)
+            throw new IllegalArgumentException("There are no connections for you to remove");
 
         String promptSource = "Enter the number of the node that is the source of this connection: ";
         String promptTarget = "Enter the number of the node that is the target of this connection: ";

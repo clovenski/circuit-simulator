@@ -420,16 +420,7 @@ public class CSEngine {
         trackedNodes.clear();
     }
 
-    public int[] getCurrentCircuitState() {
-        int[] nodeValues = new int[trackedNodes.size()];
-
-        for(int i = 0; i < trackedNodes.size(); i++)
-            nodeValues[i] = trackedNodes.get(i).getValue();
-
-        return nodeValues;
-    }
-
-    public int getLongestSequenceLength() {
+    public int getLongestInputSeqLength() {
         int longestLength = 0;
         int compareLength;
         InputVariableNode inputNode;
@@ -444,7 +435,22 @@ public class CSEngine {
         return longestLength;
     }
 
-    public int getLongestNodeNameLength() {
+    public int getLongestNameLength() {
+        int longestNameLength = 0;
+        int compareLength;
+        CSNode node;
+
+        for(int i = 0; i < circuit.getSize(); i++) {
+            node = circuit.getNode(i);
+            compareLength = node.getName().length();
+            if(compareLength > longestNameLength)
+                longestNameLength = compareLength;
+        }
+
+        return longestNameLength;
+    }
+
+    public int getLongestTrackedNameLength() {
         int longestNameLength = 0;
         int compareLength;
         CSNode node;
@@ -457,6 +463,15 @@ public class CSEngine {
         }
 
         return longestNameLength;
+    }
+
+    public int[] getCurrentCircuitState() {
+        int[] nodeValues = new int[trackedNodes.size()];
+
+        for(int i = 0; i < trackedNodes.size(); i++)
+            nodeValues[i] = trackedNodes.get(i).getValue();
+
+        return nodeValues;
     }
 
     public int[] getNextCircuitState() {
@@ -831,14 +846,23 @@ public class CSEngine {
         String inputNodeName;
         String nodeSeq;
         InputVariableNode currentNode;
+        int fieldWidth = 0;
+
+        // prepare field width, maximum between longest input node name length and 15
+        for(String nodeName : inputNodeNames)
+            if(fieldWidth < nodeName.length())
+                fieldWidth = nodeName.length();
+        fieldWidth = Math.max(fieldWidth, 15);
+
+        // build the result array
         for(int i = 0; i < inputNodeNames.size(); i++) {
             inputNodeName = inputNodeNames.get(i);
             currentNode = (InputVariableNode)circuit.getNode(inputNodeName);
             nodeSeq = currentNode.getInputSeq();
             if(nodeSeq.equals("null"))
-                result[i] = String.format("%d. %-15s %s", (i + 1), inputNodeName, "[]");
+                result[i] = String.format("%d. %-" + fieldWidth + "s %s", (i + 1), inputNodeName, "[]");
             else
-                result[i] = String.format("%d. %-15s %s", (i + 1), inputNodeName, nodeSeq);
+                result[i] = String.format("%d. %-" + fieldWidth + "s %s", (i + 1), inputNodeName, nodeSeq);
         }
 
         return result;
