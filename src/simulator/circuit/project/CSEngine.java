@@ -73,7 +73,7 @@ public class CSEngine {
     public void addDFFNode(String nodeID) throws IllegalArgumentException {
         DFlipFlop newDFFNode = new DFlipFlop(nodeID);
         FFOutNode newDFFNodeOut = new FFOutNode(nodeID + "-out", newDFFNode);
-        FFOutNode newDFFNodeOutNeg = new FFOutNode(nodeID + "-outnegated", newDFFNode);
+        FFOutNode newDFFNodeOutNeg = new FFOutNode(nodeID + "-outneg", newDFFNode);
         circuit.addNode(newDFFNode);
         circuit.addNode(newDFFNodeOut);
         circuit.addNode(newDFFNodeOutNeg);
@@ -132,18 +132,20 @@ public class CSEngine {
         CSNode targetNode;
 
         if(sourceIndex == targetIndex)
-            throw new IllegalArgumentException("That kind of connection is illegal");
+            throw new IllegalArgumentException("The specified connection is illegal");
+        if(circuit.containsEdge(sourceIndex, targetIndex))
+            throw new IllegalArgumentException((sourceIndex + 1) + " to " + (targetIndex + 1) + " connection already exists");
 
         try {
             sourceNode = circuit.getNode(sourceIndex);
         } catch(IndexOutOfBoundsException ioobe) {
-            throw new IllegalArgumentException(sourceIndex + " is an invalid index");
+            throw new IllegalArgumentException((sourceIndex + 1) + " is an invalid index");
         }
 
         try {
             targetNode = circuit.getNode(targetIndex);
         } catch(IndexOutOfBoundsException ioobe) {
-            throw new IllegalArgumentException(targetIndex + " is an invalid index");
+            throw new IllegalArgumentException((targetIndex + 1) + " is an invalid index");
         }
 
         if(sourceNode instanceof OutputVariableNode || sourceNode instanceof DFlipFlop)
@@ -162,102 +164,6 @@ public class CSEngine {
         
         // now add the edge
         circuit.addEdge(sourceIndex, targetIndex);
-    }
-
-    public void renameNode(int nodeIndex, String newName) throws IllegalArgumentException {
-        CSNode targetNode;
-        String targetNodeName;
-
-        if(circuit.contains(newName))
-            throw new IllegalArgumentException(newName + " already exists");
-
-        if(nodeIndex < 0 || nodeIndex >= circuit.getSize())
-            throw new IllegalArgumentException("The given node index is invalid");
-        
-        targetNode = circuit.getNode(nodeIndex);
-        targetNodeName = targetNode.getName();
-
-        if(targetNode instanceof FFOutNode)
-            throw new IllegalArgumentException("Output nodes for flip flops cannot be renamed directly, try renaming the flip flop instead");
-        if(targetNode instanceof Inverter)
-            throw new IllegalArgumentException("Inverter nodes cannot be renamed directly, try renaming the node it inverts instead");
-        
-        targetNode.setName(newName);
-
-        // rename target node's inverter as well, if it exists
-        if(invertedNodes.remove(targetNodeName)) {
-            circuit.getNode(targetNodeName + "-inverter").setName(newName + "-inverter");
-            invertedNodes.add(newName);
-        }
-
-        // if renamed an input node, update the inputNodeNames array
-        if(inputNodeNames.remove(targetNodeName))
-            inputNodeNames.add(newName);
-        
-        // if renamed a flip flop, also need to rename its output nodes and update the flipFlopNodeNames array
-        if(flipFlopNodeNames.remove(targetNodeName)) {
-            circuit.getNode(nodeIndex + 1).setName(newName + "-out");
-            circuit.getNode(nodeIndex + 2).setName(newName + "-outnegated");
-            flipFlopNodeNames.add(newName);
-        }
-    }
-
-    public void removeConnection(int sourceIndex, int targetIndex) throws IllegalArgumentException {
-        CSNode sourceNode;
-        CSNode targetNode;
-
-        try {
-            sourceNode = circuit.getNode(sourceIndex);
-        } catch(IndexOutOfBoundsException ioobe) {
-            throw new IllegalArgumentException(sourceIndex + " is an invalid index");
-        }
-
-        try {
-            targetNode = circuit.getNode(targetIndex);
-        } catch(IndexOutOfBoundsException ioobe) {
-            throw new IllegalArgumentException(targetIndex + " is an invalid index");
-        }
-        
-        if(!(circuit.containsEdge(sourceIndex, targetIndex)))
-            throw new IllegalArgumentException("The specified connection does not exist");
-
-        if(sourceNode instanceof FlipFlop)
-            throw new IllegalArgumentException("Flip flops cannot exist without their output nodes");
-
-        circuit.removeEdge(sourceIndex, targetIndex);
-
-        // inverters cannot exist without an input
-        if(targetNode instanceof Inverter) {
-            ArrayList<Integer> indecesToRemove = new ArrayList<Integer>();
-            removeInverter(targetIndex, indecesToRemove);
-            // no need to sort indecesToRemove list since inverters cannot point to other inverters,
-            // thus only the inverter's index will be in the list as the first element
-            circuit.removeNode(indecesToRemove.get(0));
-            invertedNodes.remove(sourceNode.getName());
-        } else { // only need to update input node reference to target node
-            VariableInput varInputNode = (VariableInput)targetNode;
-            varInputNode.removeInputNode(circuit.getNode(sourceIndex));
-        }
-    }
-
-    private void removeInverter(int inverterIndex, ArrayList<Integer> indecesToRemove) {
-        CSNode neighborNode;
-        VariableInput varInputNode;
-        Inverter targetInverter = (Inverter)circuit.getNode(inverterIndex);
-
-        indecesToRemove.add(inverterIndex);
-
-        for(int neighborIndex : circuit.getAdjList(inverterIndex)) {
-            neighborNode = circuit.getNode(neighborIndex);
-
-            if(neighborNode instanceof Inverter) {
-                removeInverter(neighborIndex, indecesToRemove);
-                invertedNodes.remove(targetInverter.getInputNode().getName());
-            } else {
-                varInputNode = (VariableInput)neighborNode;
-                varInputNode.removeInputNode(circuit.getNode(inverterIndex));
-            }
-        }
     }
 
     public void removeNode(String nodeID) throws IllegalArgumentException {
@@ -349,8 +255,106 @@ public class CSEngine {
         }
 
         Collections.sort(indecesToRemove);
-        for(int i = indecesToRemove.size() - 1; i >= 0; i--)
+        for(int i = indecesToRemove.size() - 1; i >= 0; i--) {
+            trackedNodes.remove(circuit.getNode(indecesToRemove.get(i)));
             circuit.removeNode(indecesToRemove.get(i));
+        }
+    }
+
+    private void removeInverter(int inverterIndex, ArrayList<Integer> indecesToRemove) {
+        CSNode neighborNode;
+        VariableInput varInputNode;
+        Inverter targetInverter = (Inverter)circuit.getNode(inverterIndex);
+
+        indecesToRemove.add(inverterIndex);
+
+        for(int neighborIndex : circuit.getAdjList(inverterIndex)) {
+            neighborNode = circuit.getNode(neighborIndex);
+
+            if(neighborNode instanceof Inverter) {
+                removeInverter(neighborIndex, indecesToRemove);
+                invertedNodes.remove(targetInverter.getInputNode().getName());
+            } else {
+                varInputNode = (VariableInput)neighborNode;
+                varInputNode.removeInputNode(circuit.getNode(inverterIndex));
+            }
+        }
+    }
+
+    public void renameNode(int nodeIndex, String newName) throws IllegalArgumentException {
+        CSNode targetNode;
+        String targetNodeName;
+
+        if(circuit.contains(newName))
+            throw new IllegalArgumentException(newName + " already exists");
+
+        if(nodeIndex < 0 || nodeIndex >= circuit.getSize())
+            throw new IllegalArgumentException("The given node index is invalid");
+        
+        targetNode = circuit.getNode(nodeIndex);
+        targetNodeName = targetNode.getName();
+
+        if(targetNode instanceof FFOutNode)
+            throw new IllegalArgumentException("Output nodes for flip flops cannot be renamed directly, try renaming the flip flop instead");
+        if(targetNode instanceof Inverter)
+            throw new IllegalArgumentException("Inverter nodes cannot be renamed directly, try renaming the node it inverts instead");
+        
+        targetNode.setName(newName);
+
+        // rename target node's inverter as well, if it exists
+        if(invertedNodes.remove(targetNodeName)) {
+            circuit.getNode(targetNodeName + "-inverter").setName(newName + "-inverter");
+            invertedNodes.add(newName);
+        }
+
+        // if renamed an input node, update the inputNodeNames array
+        if(inputNodeNames.remove(targetNodeName))
+            inputNodeNames.add(newName);
+        
+        // if renamed a flip flop, also need to rename its output nodes and update the flipFlopNodeNames array
+        if(flipFlopNodeNames.remove(targetNodeName)) {
+            circuit.getNode(nodeIndex + 1).setName(newName + "-out");
+            circuit.getNode(nodeIndex + 2).setName(newName + "-outneg");
+            flipFlopNodeNames.add(newName);
+        }
+    }
+
+    public void removeConnection(int sourceIndex, int targetIndex) throws IllegalArgumentException {
+        CSNode sourceNode;
+        CSNode targetNode;
+
+        if(!(circuit.containsEdge(sourceIndex, targetIndex)))
+            throw new IllegalArgumentException("The specified connection does not exist");
+
+        try {
+            sourceNode = circuit.getNode(sourceIndex);
+        } catch(IndexOutOfBoundsException ioobe) {
+            throw new IllegalArgumentException((sourceIndex + 1) + " is an invalid index");
+        }
+
+        try {
+            targetNode = circuit.getNode(targetIndex);
+        } catch(IndexOutOfBoundsException ioobe) {
+            throw new IllegalArgumentException((targetIndex + 1) + " is an invalid index");
+        }
+
+        if(sourceNode instanceof FlipFlop)
+            throw new IllegalArgumentException("Flip flops cannot exist without their output nodes");
+
+        circuit.removeEdge(sourceIndex, targetIndex);
+
+        // inverters cannot exist without an input
+        if(targetNode instanceof Inverter) {
+            ArrayList<Integer> indecesToRemove = new ArrayList<Integer>();
+            removeInverter(targetIndex, indecesToRemove);
+            // no need to sort indecesToRemove list since inverters cannot point to other inverters,
+            // thus only the inverter's index will be in the list as the first element
+            circuit.removeNode(indecesToRemove.get(0));
+            invertedNodes.remove(sourceNode.getName());
+        } else { // only need to update input node reference to target node
+            VariableInput varInputNode = (VariableInput)targetNode;
+            varInputNode.removeInputNode(circuit.getNode(sourceIndex));
+        }
     }
 
     public void setInputSeq(String inputNodeID, int[] newSeq) {
@@ -373,7 +377,7 @@ public class CSEngine {
         CSNode node;
 
         if(nodeIndex < 0 || nodeIndex >= circuit.getSize())
-            throw new IllegalArgumentException(nodeIndex + " is an invalid index");
+            throw new IllegalArgumentException((nodeIndex + 1) + " is an invalid index");
         else if(trackedNodes.contains(circuit.getNode(nodeIndex)))
             throw new IllegalArgumentException("That node is already being tracked");
         else {
@@ -403,7 +407,7 @@ public class CSEngine {
     // nodeIndex refers to node's index in trackedNodes ArrayList
     public void untrackNode(int nodeIndex) throws IllegalArgumentException {
         if(nodeIndex < 0 || nodeIndex >= trackedNodes.size())
-            throw new IllegalArgumentException(nodeIndex + " is an invalid index");
+            throw new IllegalArgumentException((nodeIndex + 1) + " is an invalid index");
 
         // reset the target node's track number to zero
         trackedNodes.get(nodeIndex).resetTrackNum();

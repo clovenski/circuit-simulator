@@ -53,5 +53,19 @@ public abstract class CSNode implements Serializable {
         return NODE_TYPE;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof CSNode) {
+            CSNode otherNode = (CSNode)obj;
+            return NODE_TYPE.equals(otherNode.NODE_TYPE) && name.equals(otherNode.name)
+                && trackNum == otherNode.trackNum;
+        } else return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return NODE_TYPE.hashCode() + name.hashCode() + trackNum;
+    }
+
     public abstract void updateValue();
 }
