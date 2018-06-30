@@ -101,8 +101,8 @@ Some remarks on using the program
 + adding a connection to nodes that can only have one input reference, such as an output variable node, will disconnect the previous connection to that node, if any
 + if you remove a connection between a node and its inverter, that inverter will be removed along with all of the inverter's connections; this effect also occurs recursively, meaning if that inverter also had its own inverter, the latter inverter is removed as well, and so on
 + truth tables are printed for combinational circuits (ones without flip flops), and transition tables are printed for sequential circuits (ones with flip flops)
-+ try to keep save file name 20 characters or below; any greater will cause formatting issue in main menu
-+ try to keep all node names short; keep in mind that these names affect the formatting in some info printing, such as the truth table for combinational circuits
++ try to keep save file names 20 characters or below; any greater will cause a formatting issue in main menu
++ try to keep all node names short; keep in mind that these names affect the formatting in the tests, such as the truth table for combinational circuits
 + editing your tracked nodes in any way is not considered a modification to your circuit, so be sure to save if you'd like to keep those changes as there would be no prompt to warn you
 
 ## Example
