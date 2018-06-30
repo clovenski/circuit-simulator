@@ -131,6 +131,9 @@ public class CSEngine {
         CSNode sourceNode;
         CSNode targetNode;
 
+        if(sourceIndex == targetIndex)
+            throw new IllegalArgumentException("That kind of connection is illegal");
+
         try {
             sourceNode = circuit.getNode(sourceIndex);
         } catch(IndexOutOfBoundsException ioobe) {
@@ -465,7 +468,7 @@ public class CSEngine {
         return longestNameLength;
     }
 
-    public int[] getCurrentCircuitState() {
+    public int[] getCurrentCircuitState() throws IllegalCircuitStateException {
         int[] nodeValues = new int[trackedNodes.size()];
 
         for(int i = 0; i < trackedNodes.size(); i++)
@@ -474,7 +477,7 @@ public class CSEngine {
         return nodeValues;
     }
 
-    public int[] getNextCircuitState() {
+    public int[] getNextCircuitState() throws IllegalCircuitStateException {
         int[] nodeValues = new int[trackedNodes.size()];
 
         updateCircuit();
@@ -486,18 +489,10 @@ public class CSEngine {
 
     }
 
-    private void updateCircuit() {
+    private void updateCircuit() throws IllegalCircuitStateException {
         String updatePath = "";
 
-        try {
-            updatePath = circuit.getUpdatePath();
-        } catch(IllegalCircuitStateException icse) {
-            System.err.println(icse.getMessage());
-            return;
-        } catch(Exception e) {
-            System.err.println(e.getMessage());
-            return;
-        }
+        updatePath = circuit.getUpdatePath();
 
         StringTokenizer tokenizer = new StringTokenizer(updatePath);
 
@@ -513,7 +508,17 @@ public class CSEngine {
         return circuit.isSequential();
     }
 
-    public ArrayList<ArrayList<Integer>> getTruthTableData() throws IllegalStateException {
+    public boolean isCircuitValid() {
+        try {
+            circuit.getUpdatePath();
+        } catch(IllegalCircuitStateException icse) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public ArrayList<ArrayList<Integer>> getTruthTableData() throws IllegalStateException, IllegalCircuitStateException {
         // int double array formatted as:   rows = 2^n where n is number of input variables,
         //                                  cols = number of input variables + number of output variables
 

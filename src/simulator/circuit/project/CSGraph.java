@@ -145,10 +145,10 @@ public class CSGraph implements Serializable {
             node.resetValue();
     }
 
-    class IllegalCircuitStateException extends Exception {
+    public class IllegalCircuitStateException extends Exception {
         private static final long serialVersionUID = 1L;
         public IllegalCircuitStateException() {
-            super("The current state of this circuit is invalid.");
+            super("The current state of this circuit is invalid");
         }
     }
 }

@@ -101,7 +101,7 @@ public class CircuitTester {
         int fieldWidth; // will store longest node name length
 
         if(nodeNames.length == 0) {
-            System.out.println("\nThere are no nodes in the circuit to track");
+            System.err.println("\nThere are no nodes in the circuit to track");
             return;
         }
 
@@ -170,13 +170,19 @@ public class CircuitTester {
 
         // if the longest input sequence is zero; in other words there are no input sequences
         if(testCycles == 0) {
-            System.out.println("\nThere are no input sequences to test this circuit with");
+            System.err.println("\nThere are no input sequences to test this circuit with");
             return;
         }
 
         // if header width is zero, then there are no tracked nodes
         if(headerWidth == 0) {
-            System.out.println("\nTrack a node in order to display its values in the test");
+            System.err.println("\nTrack a node in order to display its values in the test");
+            return;
+        }
+
+        // if circuit is in an invalid state; containing loops that do not have a flip flop in them
+        if(!engine.isCircuitValid()) {
+            System.err.println("\nThe current state of this circuit is invalid");
             return;
         }
 
@@ -194,8 +200,15 @@ public class CircuitTester {
             System.out.print("-");
         System.out.println();
         
+        // print test data
         for(int i = 0; i < testCycles; i++) {
-            trackedNodeValues = engine.getNextCircuitState();
+            try {
+                trackedNodeValues = engine.getNextCircuitState();
+            } catch(IllegalCircuitStateException icse) {
+                System.err.println("\nCircuit has reached an invalid state");
+                return;
+            }
+
             for(int value : trackedNodeValues)
                 System.out.printf("%" + (headerWidth + 1) + "d", value);
             System.out.println();
@@ -220,11 +233,14 @@ public class CircuitTester {
 
         try {
             data = engine.getTransitionTableData();
+        } catch(IllegalStateException ise) {
+            System.err.println("\n" + ise.getMessage());
+            return;
         } catch(IllegalCircuitStateException icse) {
-            System.err.println(icse.getMessage());
+            System.err.println("\n" + icse.getMessage());
             return;
         } catch(Exception e) {
-            System.err.println(e.getMessage());
+            System.err.println("\nUnknown error: " + e.getMessage());
             return;
         }
 
@@ -325,6 +341,9 @@ public class CircuitTester {
             truthTableData = engine.getTruthTableData();
         } catch(IllegalStateException ise) {
             System.err.println("\n" + ise.getMessage());
+            return;
+        } catch(IllegalCircuitStateException icse) {
+            System.err.println("\n" + icse.getMessage());
             return;
         } catch(Exception e) {
             System.err.println("\nUnknown error: " + e.getMessage());

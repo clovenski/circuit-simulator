@@ -359,7 +359,7 @@ public class CircuitEditor {
                 circuitInputSeqStatus = engine.getCircuitInputSeqStatus();
             } while(true);
         } else {
-            System.out.println("\nThere are no input nodes to set a sequence to\n");
+            System.out.println("\nThere are no input nodes to set a sequence to");
         }
     }
 }

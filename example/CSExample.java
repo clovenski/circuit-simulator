@@ -11,6 +11,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import simulator.circuit.project.CSGraph;
+import simulator.circuit.project.CSGraph.IllegalCircuitStateException;
 import simulator.circuit.project.CSEngine;
 import simulator.circuit.project.CSFileIO;
 import simulator.circuit.project.OutputVariableNode;
@@ -34,7 +35,7 @@ public class CSExample extends JPanel implements ActionListener {
         circuit = CSFileIO.readSaveFile(fileName);
 
         engine = new CSEngine(circuit);
-        maxCycles = engine.getLongestSequenceLength();
+        maxCycles = engine.getLongestInputSeqLength();
         cycleCount = 0;
 
         hSegments = new HorizontalSegment[3];
@@ -105,18 +106,23 @@ public class CSExample extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        values = engine.getNextCircuitState();
+        try {
+            values = engine.getNextCircuitState();
 
-        if(cycleCount < maxCycles) {
-            for(int value : values)
-                System.out.printf("%3d", value);
-            System.out.println();
+            if(cycleCount < maxCycles) {
+                for(int value : values)
+                    System.out.printf("%3d", value);
+                System.out.println();
+            }
+    
+            for(HorizontalSegment seg : hSegments)
+                seg.repaint();
+            for(VerticalSegment seg : vSegments)
+                seg.repaint();
+
+        } catch(IllegalCircuitStateException icse) {
+            System.err.println(icse.getMessage());
         }
-
-        for(HorizontalSegment seg : hSegments)
-            seg.repaint();
-        for(VerticalSegment seg : vSegments)
-            seg.repaint();
 
         cycleCount++;
         if(cycleCount > maxCycles) {
