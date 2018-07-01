@@ -273,7 +273,7 @@ public class CSEngine {
 
             if(neighborNode instanceof Inverter) {
                 removeInverter(neighborIndex, indecesToRemove);
-                invertedNodes.remove(targetInverter.getInputNode().getName());
+                invertedNodes.remove(targetInverter.getName());
             } else {
                 varInputNode = (VariableInput)neighborNode;
                 varInputNode.removeInputNode(circuit.getNode(inverterIndex));
@@ -284,6 +284,8 @@ public class CSEngine {
     public void renameNode(int nodeIndex, String newName) throws IllegalArgumentException {
         CSNode targetNode;
         String targetNodeName;
+        String inverterNodeName;
+        String newInvertNodeName;
 
         if(circuit.contains(newName))
             throw new IllegalArgumentException(newName + " already exists");
@@ -303,14 +305,27 @@ public class CSEngine {
 
         // rename target node's inverter as well, if it exists
         if(invertedNodes.remove(targetNodeName)) {
-            circuit.getNode(targetNodeName + "-inverter").setName(newName + "-inverter");
             invertedNodes.add(newName);
+            inverterNodeName = targetNodeName + "-inverter";
+            newInvertNodeName = newName + "-inverter";
+            circuit.getNode(inverterNodeName).setName(newInvertNodeName);
+            // the inverter may also have an inverter, and so on
+            while(invertedNodes.remove(inverterNodeName)) {
+                invertedNodes.add(newInvertNodeName);
+                inverterNodeName += "-inverter";
+                newInvertNodeName += "-inverter";
+                circuit.getNode(inverterNodeName).setName(newInvertNodeName);
+            }
         }
 
         // if renamed an input node, update the inputNodeNames array
         if(inputNodeNames.remove(targetNodeName))
             inputNodeNames.add(newName);
         
+        // if renamed an output node, update the outputNodeNames array
+        if(outputNodeNames.remove(targetNodeName))
+            outputNodeNames.add(newName);
+
         // if renamed a flip flop, also need to rename its output nodes and update the flipFlopNodeNames array
         if(flipFlopNodeNames.remove(targetNodeName)) {
             circuit.getNode(nodeIndex + 1).setName(newName + "-out");
@@ -347,13 +362,17 @@ public class CSEngine {
         if(targetNode instanceof Inverter) {
             ArrayList<Integer> indecesToRemove = new ArrayList<Integer>();
             removeInverter(targetIndex, indecesToRemove);
-            // no need to sort indecesToRemove list since inverters cannot point to other inverters,
-            // thus only the inverter's index will be in the list as the first element
-            circuit.removeNode(indecesToRemove.get(0));
+
+            Collections.sort(indecesToRemove);
+            for(int i = indecesToRemove.size() - 1; i >= 0; i--) {
+                trackedNodes.remove(circuit.getNode(indecesToRemove.get(i)));
+                circuit.removeNode(indecesToRemove.get(i));
+            }
+
             invertedNodes.remove(sourceNode.getName());
         } else { // only need to update input node reference to target node
             VariableInput varInputNode = (VariableInput)targetNode;
-            varInputNode.removeInputNode(circuit.getNode(sourceIndex));
+            varInputNode.removeInputNode(sourceNode);
         }
     }
 
