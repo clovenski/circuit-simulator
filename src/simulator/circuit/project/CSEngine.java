@@ -331,6 +331,47 @@ public class CSEngine {
             circuit.getNode(nodeIndex + 1).setName(newName + "-out");
             circuit.getNode(nodeIndex + 2).setName(newName + "-outneg");
             flipFlopNodeNames.add(newName);
+
+            // flip flop output nodes may have inverter as well
+            String tempTargetName = targetNodeName;     // temporary storage for targetNodeName
+            String tempNewName = newName;               // temporary storage for newName
+            targetNodeName = targetNodeName + "-out";
+            newName = newName + "-out";
+            // check if flip flop output node has inverter
+            if(invertedNodes.remove(targetNodeName)) {
+                invertedNodes.add(newName);
+                inverterNodeName = targetNodeName + "-inverter";
+                newInvertNodeName = newName + "-inverter";
+                circuit.getNode(inverterNodeName).setName(newInvertNodeName);
+                // the inverter may also have an inverter, and so on
+                while(invertedNodes.remove(inverterNodeName)) {
+                    invertedNodes.add(newInvertNodeName);
+                    inverterNodeName += "-inverter";
+                    newInvertNodeName += "-inverter";
+                    circuit.getNode(inverterNodeName).setName(newInvertNodeName);
+                }
+            }
+
+            targetNodeName = tempTargetName + "-outneg";
+            newName = tempNewName + "-outneg";
+            // check if flip flop output negated node has inverter
+            if(invertedNodes.remove(targetNodeName)) {
+                invertedNodes.add(newName);
+                inverterNodeName = targetNodeName + "-inverter";
+                newInvertNodeName = newName + "-inverter";
+                circuit.getNode(inverterNodeName).setName(newInvertNodeName);
+                // the inverter may also have an inverter, and so on
+                while(invertedNodes.remove(inverterNodeName)) {
+                    invertedNodes.add(newInvertNodeName);
+                    inverterNodeName += "-inverter";
+                    newInvertNodeName += "-inverter";
+                    circuit.getNode(inverterNodeName).setName(newInvertNodeName);
+                }
+            }
+
+            // restore original names from temp storage before exiting this if-block
+            targetNodeName = tempTargetName;
+            newName = tempNewName;
         }
     }
 
