@@ -7,7 +7,9 @@ public class CircuitEditor {
     private Scanner inputSource;
     private CSEngine engine;
     private String circuitName;
+    // if true, print nodes in condensed list in addNode method, otherwise print in long list
     private boolean printAltMode;
+    // if true, user input connection data by node number, otherwise by node name
     private boolean inputAltMode;
 
     public CircuitEditor(CSEngine engine, String circuitName, Scanner inputSource) {
@@ -373,11 +375,9 @@ public class CircuitEditor {
                 System.err.println("\n" + iae.getMessage());
             }
         }
-        
     }
 
     private void toggleInputMode() {
-        // invert inputModeAlt field, with text notifying user
         if(inputAltMode)
             System.out.println("\nConnection input will now be inputted normally, by node name");
         else
