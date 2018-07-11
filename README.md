@@ -59,7 +59,8 @@ Main Menu
 |   +-- edit connections
 |   |   |
 |   |   +-- add connection
-|   |   \-- remove connection
+|   |   +-- remove connection
+|   |   \-- toggle input mode
 |   |
 |   \-- edit input sequences
 |

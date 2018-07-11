@@ -8,12 +8,14 @@ public class CircuitEditor {
     private CSEngine engine;
     private String circuitName;
     private boolean printAltMode;
+    private boolean inputAltMode;
 
     public CircuitEditor(CSEngine engine, String circuitName, Scanner inputSource) {
         this.engine = engine;
         this.circuitName = circuitName;
         this.inputSource = inputSource;
         printAltMode = false;
+        inputAltMode = false;
     }
 
     public void start() {
@@ -244,10 +246,12 @@ public class CircuitEditor {
         ArrayList<String> options = new ArrayList<String>();
         options.add("Add a connection");
         options.add("Remove a connection");
+        options.add("Toggle input method");
         options.add("Return");
 
         do {
             System.out.println("\nCS > Main Menu > Circuit Editor > Edit Connections");
+            System.out.printf("%30s %s\n", "Connection input mode:", (inputAltMode ? "by node number" : "by node name"));
             System.out.printf("%17s connections:\n\n", circuitName);
 
             nodeNames = engine.getCircuitNodeNames();
@@ -278,7 +282,9 @@ public class CircuitEditor {
                                 break;
                     case 2:     removeConnection();
                                 break;
-                    case 3:     return;
+                    case 3:     toggleInputMode();
+                                break;
+                    case 4:     return;
                 }
             } catch(IllegalArgumentException iae) {
                 System.err.println("\n" + iae.getMessage());
@@ -287,45 +293,99 @@ public class CircuitEditor {
     }
 
     private void addConnection() throws IllegalArgumentException {
+        String promptSource;
+        String promptTarget;
+        String sourceName;
+        String targetName;
         int sourceNodeIndex;
         int targetNodeIndex;
         int circuitSize = engine.getCircuitSize();
         if(circuitSize <= 1)
             throw new IllegalArgumentException("There are not enough nodes to add a connection");
 
-        String promptSource = "Enter the number of the node to be the source of this connection: ";
-        String promptTarget = "Enter the number of the node to be the target of this connection: ";
+        // if inputting connection data normally, by node name
+        if(!inputAltMode) {
+            promptSource = "Enter the name of the node to be the source of this connection: ";
+            promptTarget = "Enter the name of the node to be the target of this connection: ";
+            sourceName = CSUserInterface.getUserStringInput(promptSource, inputSource);
+            targetName = CSUserInterface.getUserStringInput(promptTarget, inputSource);
 
-        sourceNodeIndex = CSUserInterface.getUserIntInput(promptSource, circuitSize, inputSource) - 1;
-        targetNodeIndex = CSUserInterface.getUserIntInput(promptTarget, circuitSize, inputSource) - 1;
+            try {
+                engine.addConnection(sourceName, targetName);
+                System.out.println("\nSuccessfully added connection from " + sourceName + " to " + targetName);
+            } catch(IllegalArgumentException iae) {
+                System.err.println("\n" + iae.getMessage());
+            }
 
-        try {
-            engine.addConnection(sourceNodeIndex, targetNodeIndex);
-            System.out.println("\nSuccessfully added connection from " + (sourceNodeIndex + 1) + " to " + (targetNodeIndex + 1));
-        } catch(IllegalArgumentException iae) {
-            System.err.println("\n" + iae.getMessage());
+        } else { // user will input connection data by node numbers
+            promptSource = "Enter the number of the node to be the source of this connection: ";
+            promptTarget = "Enter the number of the node to be the target of this connection: ";
+
+            sourceNodeIndex = CSUserInterface.getUserIntInput(promptSource, circuitSize, inputSource) - 1;
+            targetNodeIndex = CSUserInterface.getUserIntInput(promptTarget, circuitSize, inputSource) - 1;
+
+            try {
+                engine.addConnection(sourceNodeIndex, targetNodeIndex);
+                System.out.println("\nSuccessfully added connection from " + (sourceNodeIndex + 1) + " to " + (targetNodeIndex + 1));
+            } catch(IllegalArgumentException iae) {
+                System.err.println("\n" + iae.getMessage());
+            }
         }
     }
 
     private void removeConnection() throws IllegalArgumentException {
+        String promptSource;
+        String promptTarget;
+        String sourceName;
+        String targetName;
         int sourceNodeIndex;
         int targetNodeIndex;
         int circuitSize = engine.getCircuitSize();
         if(circuitSize <= 1)
             throw new IllegalArgumentException("There are no connections for you to remove");
 
-        String promptSource = "Enter the number of the node that is the source of this connection: ";
-        String promptTarget = "Enter the number of the node that is the target of this connection: ";
+        // if inputting connection data normally, by node name
+        if(!inputAltMode) {
+            promptSource = "Enter the name of the node that is the source of this connection: ";
+            promptTarget = "Enter the name of the node that is the target of this connection: ";
 
-        sourceNodeIndex = CSUserInterface.getUserIntInput(promptSource, circuitSize, inputSource) - 1;
-        targetNodeIndex = CSUserInterface.getUserIntInput(promptTarget, circuitSize, inputSource) - 1;
+            sourceName = CSUserInterface.getUserStringInput(promptSource, inputSource);
+            targetName = CSUserInterface.getUserStringInput(promptTarget, inputSource);
 
-        try {
-            engine.removeConnection(sourceNodeIndex, targetNodeIndex);
-            System.out.println("\nSuccessfully removed connection from " + (sourceNodeIndex + 1) + " to " + (targetNodeIndex + 1));
-        } catch(IllegalArgumentException iae) {
-            System.err.println("\n" + iae.getMessage());
+            try {
+                engine.removeConnection(sourceName, targetName);
+                System.out.println("\nSuccessfully removed connection from " + sourceName + " to " + targetName);
+            } catch(IllegalArgumentException iae) {
+                System.err.println("\n" + iae.getMessage());
+            }
+
+        } else { // user will input connection data by node numbers
+            promptSource = "Enter the number of the node that is the source of this connection: ";
+            promptTarget = "Enter the number of the node that is the target of this connection: ";
+
+            sourceNodeIndex = CSUserInterface.getUserIntInput(promptSource, circuitSize, inputSource) - 1;
+            targetNodeIndex = CSUserInterface.getUserIntInput(promptTarget, circuitSize, inputSource) - 1;
+
+            try {
+                engine.removeConnection(sourceNodeIndex, targetNodeIndex);
+                System.out.println("\nSuccessfully removed connection from " + (sourceNodeIndex + 1) + " to " + (targetNodeIndex + 1));
+            } catch(IllegalArgumentException iae) {
+                System.err.println("\n" + iae.getMessage());
+            }
         }
+        
+    }
+
+    private void toggleInputMode() {
+        // invert inputModeAlt field, with text notifying user
+        if(inputAltMode)
+            System.out.println("\nConnection input will now be inputted normally, by node name");
+        else
+            System.out.println("\nConnection input will now be inputted differently, by node number");
+
+        inputAltMode = !inputAltMode;
+        System.out.println("\nPress [ENTER] to return");
+        inputSource.nextLine();
     }
 
     private void setInputSeq() {

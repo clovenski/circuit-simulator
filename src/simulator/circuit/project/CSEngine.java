@@ -166,6 +166,53 @@ public class CSEngine {
         circuit.addEdge(sourceIndex, targetIndex);
     }
 
+    public void addConnection(String sourceName, String targetName) throws IllegalArgumentException {
+        CSNode sourceNode;
+        CSNode targetNode;
+
+        int sourceIndex = circuit.indexOf(sourceName);
+        int targetIndex = circuit.indexOf(targetName);
+        
+        if(sourceIndex == -1)
+            throw new IllegalArgumentException(sourceName + " does not exist in the circuit");
+        if(targetIndex == -1)
+            throw new IllegalArgumentException(targetName + " does not exist in the circuit");
+
+        if(sourceIndex == targetIndex)
+            throw new IllegalArgumentException("The specified connection is illegal");
+        if(circuit.containsEdge(sourceIndex, targetIndex))
+            throw new IllegalArgumentException((sourceIndex + 1) + " to " + (targetIndex + 1) + " connection already exists");
+
+        try {
+            sourceNode = circuit.getNode(sourceIndex);
+        } catch(IndexOutOfBoundsException ioobe) {
+            throw new IllegalArgumentException((sourceIndex + 1) + " is an invalid index");
+        }
+
+        try {
+            targetNode = circuit.getNode(targetIndex);
+        } catch(IndexOutOfBoundsException ioobe) {
+            throw new IllegalArgumentException((targetIndex + 1) + " is an invalid index");
+        }
+
+        if(sourceNode instanceof OutputVariableNode || sourceNode instanceof DFlipFlop)
+            throw new IllegalArgumentException(sourceNode.getName() + " cannot be a source of a connection");
+        if(!(targetNode instanceof VariableInput))
+            throw new IllegalArgumentException(targetNode.getName() + " cannot be a target of a connection");
+
+        // update target node's input reference
+        VariableInput variableInputNode = (VariableInput)targetNode;
+        variableInputNode.addInputNode(sourceNode);
+
+        // if target node was not a Gate, then first need to remove previous connections, if any
+        if(!(variableInputNode instanceof Gate))
+            for(int i = 0; i < circuit.getSize(); i++)
+                circuit.removeEdge(i, targetIndex);
+        
+        // now add the edge
+        circuit.addEdge(sourceIndex, targetIndex);
+    }
+
     public void removeNode(String nodeID) throws IllegalArgumentException {
         int nodeIndex = circuit.indexOf(nodeID);
 
@@ -378,6 +425,56 @@ public class CSEngine {
     public void removeConnection(int sourceIndex, int targetIndex) throws IllegalArgumentException {
         CSNode sourceNode;
         CSNode targetNode;
+
+        if(!(circuit.containsEdge(sourceIndex, targetIndex)))
+            throw new IllegalArgumentException("The specified connection does not exist");
+
+        try {
+            sourceNode = circuit.getNode(sourceIndex);
+        } catch(IndexOutOfBoundsException ioobe) {
+            throw new IllegalArgumentException((sourceIndex + 1) + " is an invalid index");
+        }
+
+        try {
+            targetNode = circuit.getNode(targetIndex);
+        } catch(IndexOutOfBoundsException ioobe) {
+            throw new IllegalArgumentException((targetIndex + 1) + " is an invalid index");
+        }
+
+        if(sourceNode instanceof FlipFlop)
+            throw new IllegalArgumentException("Flip flops cannot exist without their output nodes");
+
+        circuit.removeEdge(sourceIndex, targetIndex);
+
+        // inverters cannot exist without an input
+        if(targetNode instanceof Inverter) {
+            ArrayList<Integer> indecesToRemove = new ArrayList<Integer>();
+            removeInverter(targetIndex, indecesToRemove);
+
+            Collections.sort(indecesToRemove);
+            for(int i = indecesToRemove.size() - 1; i >= 0; i--) {
+                trackedNodes.remove(circuit.getNode(indecesToRemove.get(i)));
+                circuit.removeNode(indecesToRemove.get(i));
+            }
+
+            invertedNodes.remove(sourceNode.getName());
+        } else { // only need to update input node reference to target node
+            VariableInput varInputNode = (VariableInput)targetNode;
+            varInputNode.removeInputNode(sourceNode);
+        }
+    }
+
+    public void removeConnection(String sourceName, String targetName) throws IllegalArgumentException {
+        CSNode sourceNode;
+        CSNode targetNode;
+
+        int sourceIndex = circuit.indexOf(sourceName);
+        int targetIndex = circuit.indexOf(targetName);
+
+        if(sourceIndex == -1)
+            throw new IllegalArgumentException(sourceName + " does not exist in the circuit");
+        if(targetIndex == -1)
+            throw new IllegalArgumentException(targetName + " does not exist in the circuit");
 
         if(!(circuit.containsEdge(sourceIndex, targetIndex)))
             throw new IllegalArgumentException("The specified connection does not exist");
