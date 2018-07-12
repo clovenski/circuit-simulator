@@ -754,7 +754,7 @@ public class CSEngine {
         String seqString;
         for(int i = 0; i < originalSequences.size(); i++) {
             seqString = originalSequences.get(i);
-            if(seqString.equals("null"))
+            if(seqString.equals(""))
                 inputVariables.get(i).setInputSeq(null);
             else {
                 tempSequence = new int[seqString.length()];
@@ -942,6 +942,7 @@ public class CSEngine {
     public int[] getCircuitStatus() {
         int[] status = new int[7];
         CSNode node;
+        InputVariableNode inputNode;
         int inputNodes = 0;
         int sequences = 0;
         int outNodes = 0;
@@ -955,7 +956,7 @@ public class CSEngine {
 
             if(node instanceof InputVariableNode) {
                 inputNodes++;
-                InputVariableNode inputNode = (InputVariableNode)node;
+                inputNode = (InputVariableNode)node;
                 if(!inputNode.getInputSeq().equals("null"))
                     sequences++;
                 
