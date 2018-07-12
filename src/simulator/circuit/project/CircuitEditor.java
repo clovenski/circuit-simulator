@@ -248,7 +248,7 @@ public class CircuitEditor {
         ArrayList<String> options = new ArrayList<String>();
         options.add("Add a connection");
         options.add("Remove a connection");
-        options.add("Toggle input method");
+        options.add("Toggle input mode");
         options.add("Return");
 
         do {
