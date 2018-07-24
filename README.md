@@ -127,3 +127,7 @@ Testing circuit example:
 Truth and transition table examples:
 
 ![Alt text](example/captures/truth_table_example.PNG) ![Alt text](example/captures/trans_table_example.PNG)
+
+## Contact
+
+Contact me [here](https://clovenski.github.io/resume/)
