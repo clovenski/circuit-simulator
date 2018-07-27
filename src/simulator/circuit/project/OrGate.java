@@ -27,9 +27,15 @@ public class OrGate extends Gate {
      * Update this OR gate's value.
      * <p>
      * Value will be updated to 1 if at least one of its input nodes contain
-     * a value of 1; otherwise it is updated to 0.
+     * a value of 1; otherwise it is updated to 0. If not input nodes exist,
+     * the value is simply updated to 0.
      */
     public void updateValue() {
+        if(inputNodes.size() == 0) {
+            value = 0;
+            return;
+        }
+
         for(CSNode node : inputNodes)
             if(node.value == 1) {
                 value = 1;

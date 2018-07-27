@@ -29,9 +29,15 @@ public class NXorGate extends Gate {
      * <p>
      * Value will be updated to 1 if and only if an even number of its input
      * nodes contain a value of 1; otherwise it is update to 0.
+     * If no input nodes exist, the value is simply updated to 0.
      */
     public void updateValue() {
         int count = 0;
+
+        if(inputNodes.size() == 0) {
+            value = 0;
+            return;
+        }
 
         for(CSNode node : inputNodes)
             if(node.value == 1)

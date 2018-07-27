@@ -30,8 +30,14 @@ public class NandGate extends Gate {
      * <p>
      * The node's value will be updated to 0 if and only if all of
      * its input nodes contain a value of 1; otherwise it is updated to 1.
+     * If no input nodes exist, the value is simply updated to 0.
      */
     public void updateValue() {
+        if(inputNodes.size() == 0) {
+            value = 0;
+            return;
+        }
+
         for(CSNode node : inputNodes)
             if(node.value == 0) {
                 value = 1;

@@ -105,6 +105,10 @@ public class InputVariableNode extends CSNode {
      * <p>
      * Note that any nonzero integer in the input sequence will update the value
      * to 1, otherwise a zero will simply update the value to 0.
+     * If this input variable node has been already been updated to the last
+     * integer in its input sequence, then its value is updated to 0 and any more
+     * invocations of this method will result in no change until the value is reset
+     * with {@linkplain #resetValue()}.
      */
     public void updateValue() {
         if(inputSeq == null || currentIndex == inputSeq.length)

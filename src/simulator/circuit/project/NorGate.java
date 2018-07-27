@@ -28,8 +28,14 @@ public class NorGate extends Gate {
      * <p>
      * The value will be updated to 1 if and only if all of its
      * input nodes contain a value of 0; otherwise it is updated to 0.
+     * If no input nodes exist, the value is simply updated to 0.
      */
     public void updateValue() {
+        if(inputNodes.size() == 0) {
+            value = 0;
+            return;
+        }
+
         for(CSNode node : inputNodes)
             if(node.value == 1) {
                 value = 0;

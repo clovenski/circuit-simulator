@@ -30,9 +30,15 @@ public class AndGate extends Gate {
      * Update this AND gate's value.
      * <p>
      * This node's value will be updated to 1 if and only if all of its input node
-     * values are 1; otherwise it will update to 0.
+     * values are 1; otherwise it will update to 0. If no input nodes exist, then
+     * the value is simply updated to 0.
      */
     public void updateValue() {
+        if(inputNodes.size() == 0) {
+            value = 0;
+            return;
+        }
+
         for(CSNode node : inputNodes)
             if(node.value == 0) {
                 value = 0;
