@@ -14,6 +14,10 @@ import java.io.Serializable;
  */
 public abstract class CSNode implements Serializable {
     /**
+     * Needed to implement Serializable, and thus needed for saving circuits as files.
+     */
+    private static final long serialVersionUID = 1L;
+    /**
      * The current value that this node has within the circuit; either 1 or 0.
      */
     protected int value;        // note: package needs access for building truth and transition tables in CSEngine
@@ -34,17 +38,13 @@ public abstract class CSNode implements Serializable {
      * For example, input variables will have a node type of "INPUT".
      */
     private final String NODE_TYPE;         // node type can be at most 6 characters, for formatting in menus
-    /**
-     * Needed to implement Serializable, and thus needed for saving circuits as files
-     */
-    private static final long serialVersionUID = 1L;
     
     /**
      * Constructs a new CSNode object with the given name and type.
      * 
-     * @param name Identifier for this node.
-     * @param type Type of this node. If a string longer than 6 characters is given,
-     * then only the first 6 characters are used.
+     * @param name identifier for this node
+     * @param type type of this node; if a string longer than 6 characters is given,
+     * then only the first 6 characters are used
      */
     public CSNode(String name, String type) {
         value = 0;
@@ -59,7 +59,7 @@ public abstract class CSNode implements Serializable {
     /**
      * Sets a new name for this node.
      * 
-     * @param newName String representing the new name for this node.
+     * @param newName string representing the new name for this node
      */
     public void setName(String newName) {
         name = newName;
@@ -68,7 +68,7 @@ public abstract class CSNode implements Serializable {
     /**
      * Gets this node's name/identifier.
      * 
-     * @return The current name of this node.
+     * @return the current name of this node
      */
     public String getName() {
         return name;
@@ -77,7 +77,7 @@ public abstract class CSNode implements Serializable {
     /**
      * Gets this node's current value.
      * 
-     * @return Either 1 or 0 depending on this node's status in the circuit.
+     * @return either 1 or 0 depending on this node's status in the circuit
      */
     public int getValue() {
         return value;
@@ -93,7 +93,7 @@ public abstract class CSNode implements Serializable {
     /**
      * Sets this node's track number.
      * 
-     * @param trackNum Positive integer representing this node's new track number.
+     * @param trackNum positive integer representing this node's new track number
      */
     public void setTrackNum(int trackNum) {
         if(trackNum > 0)
@@ -103,7 +103,7 @@ public abstract class CSNode implements Serializable {
     /**
      * Gets this node's track number.
      * 
-     * @return Integer greater than or equal to zero; representing the track number.
+     * @return integer greater than or equal to zero; representing the track number
      */
     public int getTrackNum() {
         return trackNum;
@@ -120,8 +120,8 @@ public abstract class CSNode implements Serializable {
     /**
      * Gets this node's type.
      * 
-     * @return A string that is at most 6 characters long, representing this node's
-     * type.
+     * @return a string that is at most 6 characters long, representing this node's
+     * type
      */
     public String getNodeType() {
         return NODE_TYPE;
