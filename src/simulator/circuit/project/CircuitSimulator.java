@@ -6,15 +6,54 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
 
+/**
+ * Entry point for the program.
+ * <p>
+ * This class contains the main method to start the program.
+ * Pass the file name as an argument to start the program with
+ * the circuit already loaded.
+ * 
+ * @author Joel Tengco
+ */
 public class CircuitSimulator {
+    /**
+     * Source of input from the user.
+     */
     private Scanner inputSource;
+    /**
+     * Holds the name of the circuit currently being worked on.
+     */
     private String circuitName;
+    /**
+     * Circuit engine to interface with the circuit.
+     */
     private CSEngine engine;
+    /**
+     * Circuit editor to handle editing the circuit.
+     */
     private CircuitEditor editor;
+    /**
+     * Circuit tester to handle testing the circuit.
+     */
     private CircuitTester tester;
+    /**
+     * True if the circuit currently being worked on is a new circuit, false otherwise.
+     */
     private boolean circuitIsNew;
+    /**
+     * True if the user has previously opted to edit the circuit, false otherwise.
+     * <p>
+     * Note that this will be set to true if the user has simply entered the editor.
+     * This boolean having a true value does not imply that the circuit has actually
+     * been altered.
+     */
     private boolean circuitEdited;
 
+    /**
+     * Constructs an instance of the program; ready to be started.
+     * <p>
+     * A new, empty circuit will be created to work on.
+     */
     public CircuitSimulator() {
         engine = new CSEngine();
         circuitName = "new-circuit";
@@ -25,6 +64,17 @@ public class CircuitSimulator {
         tester = new CircuitTester(engine, inputSource);
     }
 
+    /**
+     * Constructs an instance of the program; ready to be started.
+     * <p>
+     * If a circuit saved as a file with the specified file name exists,
+     * then that circuit is loaded and will be the circuit to be worked on.
+     * Also, if any error occurs while attempting to load the circuit, then
+     * error messages are printed out and a new circuit will be created and
+     * worked on instead.
+     * 
+     * @param fileName the name of the file that contains the saved circuit
+     */
     public CircuitSimulator(String fileName) {
         CSGraph circuit;
 
@@ -62,6 +112,17 @@ public class CircuitSimulator {
         tester = new CircuitTester(engine, inputSource);
     }
 
+    /**
+     * Starts Circuit Simulator.
+     * <p>
+     * This starts the program and does not return until the user
+     * opts to exit the program through the main menu printed
+     * directly from this method.
+     * <p>
+     * The main menu prints a welcome title, a list of saved circuits
+     * with their last modified property (if any saved circuits exist),
+     * and a menu for the user to choose from.
+     */
     public void start() {
         ArrayList<String> options = new ArrayList<String>();
         int userInput;
@@ -121,6 +182,9 @@ public class CircuitSimulator {
         } while(true);
     }
 
+    /**
+     * Prints the general information about the circuit.
+     */
     private void printCircuitInfo() {
         int[] circuitStatus = engine.getCircuitStatus();
         String circuitType = engine.isCircuitSequential() ? "Sequential" : "Combinational";
@@ -143,6 +207,13 @@ public class CircuitSimulator {
         System.out.printf("%-15s : %d\n", "Connections", circuitStatus[index++]);
     }
 
+    /**
+     * Saves the current circuit.
+     * <p>
+     * If the circuit is new then the user will be prompted for the file name
+     * of the new save file, otherwise the state of the circuit is saved to
+     * its corresponding save file.
+     */
     private void saveCircuit() {
         if(circuitIsNew) {
             saveCircuitAs();
@@ -158,6 +229,14 @@ public class CircuitSimulator {
         }
     }
 
+    /**
+     * Saves the circuit with a user-specified file name.
+     * <p>
+     * Prompts the user for a file name and if it does not already
+     * exist in the saves folder, then it is properly saved. Otherwise
+     * the user is asked to confirm they want to overwrite the old file
+     * or cancel.
+     */
     private void saveCircuitAs() {
         File[] files = CSFileIO.getSaveDir().listFiles();
         String fileName;
@@ -204,6 +283,14 @@ public class CircuitSimulator {
         }
     }
 
+    /**
+     * Loads a circuit from a save file.
+     * <p>
+     * If save files exist, the list of circuits to load is printed
+     * and the user can choose to load a circuit or cancel. A warning
+     * is also given mentioning that any unsaved changes to the current
+     * circuit will be lost.
+     */
     private void loadCircuit() {
         int userInput;
         String fileName;
@@ -246,6 +333,12 @@ public class CircuitSimulator {
         }
     }
 
+    /**
+     * Creates a new circuit for the program to work on.
+     * <p>
+     * If the user has possibly edited the current circuit, then they
+     * are asked to either save the current circuit or continue without saving.
+     */
     private void newCircuit() {
         int userInput;
 
@@ -266,6 +359,12 @@ public class CircuitSimulator {
         System.out.println("\nSuccessfully created new circuit");
     }
 
+    /**
+     * Properly exits the program.
+     * <p>
+     * If the user has possible edited the current circuit, then they
+     * are asked if they want to save before exiting.
+     */
     private void exit() {
         int userInput;
 
@@ -281,6 +380,15 @@ public class CircuitSimulator {
         inputSource.close();
     }
 
+    /**
+     * Main method for the program.
+     * <p>
+     * If arguments exist, then the program is started with the first
+     * argument being the name of the file to load from. Otherwise, a new
+     * circuit is created for the program to work on.
+     * 
+     * @param args first argument being the name of the file to load a circuit from
+     */
     public static void main(String[] args) {
         CircuitSimulator program;
 
