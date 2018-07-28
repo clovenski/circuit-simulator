@@ -3,6 +3,14 @@ package simulator.circuit.project;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+/**
+ * Class to handle editing circuits in the program.
+ * <p>
+ * Through this class, the user is able to add nodes, removes nodes, rename nodes,
+ * add connections, remove connections and set input sequences.
+ * 
+ * @author Joel Tengco
+ */
 public class CircuitEditor {
     private Scanner inputSource;
     private CSEngine engine;
