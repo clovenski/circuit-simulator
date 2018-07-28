@@ -11,13 +11,14 @@ public class CircuitTester {
     private String circuitName;
     private Scanner inputSource;
 
-    public CircuitTester(CSEngine engine, String circuitName, Scanner inputSource) {
+    public CircuitTester(CSEngine engine, Scanner inputSource) {
         this.engine = engine;
-        this.circuitName = circuitName;
         this.inputSource = inputSource;
     }
 
-    public void start() {
+    public void test(String circuitName) {
+        this.circuitName = circuitName;
+
         int userInput;
 
         String printTableOpt;

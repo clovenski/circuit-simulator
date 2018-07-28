@@ -20,15 +20,16 @@ public class CircuitEditor {
     // if true, user input connection data by node number, otherwise by node name
     private boolean inputAltMode;
 
-    public CircuitEditor(CSEngine engine, String circuitName, Scanner inputSource) {
+    public CircuitEditor(CSEngine engine, Scanner inputSource) {
         this.engine = engine;
-        this.circuitName = circuitName;
         this.inputSource = inputSource;
         printAltMode = false;
         inputAltMode = false;
     }
 
-    public void start() {
+    public void edit(String circuitName) {
+        this.circuitName = circuitName;
+
         char[] statusLetters = new char[] {'i', 's', 'o', 'f', 'g', 'n', 'c'};
         String statusBar;
         int[] circuitStatus;

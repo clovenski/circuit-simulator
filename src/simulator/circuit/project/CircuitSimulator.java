@@ -10,6 +10,8 @@ public class CircuitSimulator {
     private Scanner inputSource;
     private String circuitName;
     private CSEngine engine;
+    private CircuitEditor editor;
+    private CircuitTester tester;
     private boolean circuitIsNew;
     private boolean circuitEdited;
 
@@ -19,6 +21,8 @@ public class CircuitSimulator {
         circuitIsNew = true;
         circuitEdited = false;
         inputSource = new Scanner(System.in);
+        editor = new CircuitEditor(engine, inputSource);
+        tester = new CircuitTester(engine, inputSource);
     }
 
     public CircuitSimulator(String fileName) {
@@ -54,6 +58,8 @@ public class CircuitSimulator {
 
         circuitEdited = false;
         inputSource = new Scanner(System.in);
+        editor = new CircuitEditor(engine, inputSource);
+        tester = new CircuitTester(engine, inputSource);
     }
 
     public void start() {
@@ -96,10 +102,10 @@ public class CircuitSimulator {
             switch(userInput) {
                 case 1:     printCircuitInfo();
                             break;
-                case 2:     editCircuit();
+                case 2:     editor.edit(circuitName);
                             circuitEdited = true;
                             break;
-                case 3:     testCircuit();
+                case 3:     tester.test(circuitName);
                             break;
                 case 4:     saveCircuit();
                             break;
@@ -135,16 +141,6 @@ public class CircuitSimulator {
         System.out.printf("%-15s : %d\n", "Gates", circuitStatus[index++]);
         System.out.printf("%-15s : %d\n", "Inverters", circuitStatus[index++]);
         System.out.printf("%-15s : %d\n", "Connections", circuitStatus[index++]);
-    }
-
-    private void editCircuit() {
-        CircuitEditor editor = new CircuitEditor(engine, circuitName, inputSource);
-        editor.start();
-    }
-
-    private void testCircuit() {
-        CircuitTester tester = new CircuitTester(engine, circuitName, inputSource);
-        tester.start();
     }
 
     private void saveCircuit() {
