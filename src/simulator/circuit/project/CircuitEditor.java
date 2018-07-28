@@ -12,14 +12,34 @@ import java.util.Scanner;
  * @author Joel Tengco
  */
 public class CircuitEditor {
+    /**
+     * Source to retrieve user input.
+     */
     private Scanner inputSource;
+    /**
+     * Circuit engine to interface with the circuit to edit.
+     */
     private CSEngine engine;
+    /**
+     * Holds the name of the circuit currently being edited.
+     */
     private String circuitName;
-    // if true, print nodes in condensed list in addNode method, otherwise print in long list
+    /**
+     * If true, print nodes in condensed list in addNode method, otherwise print in long list.
+     */
     private boolean printAltMode;
-    // if true, user input connection data by node number, otherwise by node name
+    /**
+     * If true, user will input connection data by node number, otherwise by node name.
+     */
     private boolean inputAltMode;
 
+    /**
+     * Constructs a new circuit editor corresponding to the given engine along with the
+     * specified source for user input.
+     * 
+     * @param engine the engine for this editor to interface with the circuit with
+     * @param inputSource the source to retrieve user input
+     */
     public CircuitEditor(CSEngine engine, Scanner inputSource) {
         this.engine = engine;
         this.inputSource = inputSource;
@@ -27,6 +47,30 @@ public class CircuitEditor {
         inputAltMode = false;
     }
 
+    /**
+     * Entry point to start editing the circuit.
+     * <p>
+     * The circuit to be edited will be the circuit that the engine currently corresponds to.
+     * Note that the parameter is simply a means to print the circuit name in the header in
+     * the menus, it does not imply which circuit is being edited; the engine that was referenced
+     * when constructing this editor handles that.
+     * <p>
+     * This method will return once the user opts to do so within the menu printed directly from this
+     * method.
+     * <p>
+     * The status letters printed from this method correspond to the existence of:
+     * <ul>
+     *  <li>i = input variable nodes</li>
+     *  <li>s = input sequences</li>
+     *  <li>o = output variable nodes</li>
+     *  <li>f = flip-flops</li>
+     *  <li>g = gates</li>
+     *  <li>n = inverters</li>
+     *  <li>c = connections</li>
+     * </ul>
+     * 
+     * @param circuitName the name of the circuit being edited
+     */
     public void edit(String circuitName) {
         this.circuitName = circuitName;
 
@@ -77,6 +121,11 @@ public class CircuitEditor {
 
     }
 
+    /**
+     * Section to edit the nodes of the circuit.
+     * <p>
+     * At this point, the user can add nodes, remove nodes and rename nodes.
+     */
     private void editNodes() {
         int userInput;
         String[] nodeNames;
@@ -135,6 +184,11 @@ public class CircuitEditor {
         } while(true);
     }
 
+    /**
+     * Section to add nodes to the circuit.
+     * <p>
+     * At this point, the user is able to add any node supported by the program.
+     */
     private void addNode() {
         int userInput;
         String newNodeName = "";
@@ -204,6 +258,11 @@ public class CircuitEditor {
         } while(true);
     }
 
+    /**
+     * Section to remove a node from the circuit.
+     * 
+     * @throws IllegalArgumentException if there are no nodes in the circuit
+     */
     private void removeNode() throws IllegalArgumentException {
         String targetNode;
         int circuitSize = engine.getCircuitSize();
@@ -219,6 +278,11 @@ public class CircuitEditor {
         }
     }
 
+    /**
+     * Section to rename a node in the circuit.
+     * 
+     * @throws IllegalArgumentException if there are no nodes in the circuit
+     */
     private void renameNode() throws IllegalArgumentException {
         int userIntInput;
         String newName;
@@ -237,6 +301,12 @@ public class CircuitEditor {
         }
     }
 
+    /**
+     * Toggles the mode of printing the list of nodes in {@linkplain #editNodes()}.
+     * <p>
+     * By default the nodes are printed one node per line, and alternatively it can be
+     * printed in a condensed list.
+     */
     private void togglePrintMode() {
         if(printAltMode)
             System.out.println("\nNodes will now be printed normally, with one node per line");
@@ -248,6 +318,11 @@ public class CircuitEditor {
         inputSource.nextLine();
     }
 
+    /**
+     * Section to edit the connections in the circuit.
+     * <p>
+     * At this point, the user is able to add or remove a connection.
+     */
     private void editConnections() {
         int userInput;
         int fieldWidth;
@@ -303,6 +378,11 @@ public class CircuitEditor {
         } while(true);
     }
 
+    /**
+     * Section to add a connection in the circuit.
+     * 
+     * @throws IllegalArgumentException if there are less than 2 nodes in the circuit
+     */
     private void addConnection() throws IllegalArgumentException {
         String promptSource;
         String promptTarget;
@@ -344,6 +424,11 @@ public class CircuitEditor {
         }
     }
 
+    /**
+     * Section to remove a connection in the circuit.
+     * 
+     * @throws IllegalArgumentException if there are no connections in the circuit
+     */
     private void removeConnection() throws IllegalArgumentException {
         String promptSource;
         String promptTarget;
@@ -386,6 +471,12 @@ public class CircuitEditor {
         }
     }
 
+    /**
+     * Toggles the input mode when editing connections.
+     * <p>
+     * By default, the user is prompted to input node names to define a connection,
+     * and alternatively the user is prompted to input node numbers instead.
+     */
     private void toggleInputMode() {
         if(inputAltMode)
             System.out.println("\nConnection input will now be inputted normally, by node name");
@@ -397,6 +488,12 @@ public class CircuitEditor {
         inputSource.nextLine();
     }
 
+    /**
+     * Section to set input sequences of input variables in the circuit.
+     * <p>
+     * The user provides input sequences by a sequence of ones and zeros, separated by spaces.
+     * Any token other than "1" or "0" will be ignored.
+     */
     private void setInputSeq() {
         int userInput;
         int inputNodeIndex;

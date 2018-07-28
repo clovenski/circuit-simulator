@@ -140,6 +140,7 @@ public class CSGraph implements Serializable {
     /**
      * Returns whether or not this circuit contains a node with the specified node ID/name.
      * 
+     * @param nodeID the ID/name of the node to check for
      * @return true if a node with the specified ID/name exists in this circuit, false otherwise
      */
     public boolean contains(String nodeID) {
