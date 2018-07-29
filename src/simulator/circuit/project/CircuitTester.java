@@ -6,16 +6,58 @@ import java.util.Scanner;
 
 import simulator.circuit.project.CSGraph.IllegalCircuitStateException;
 
+/**
+ * Class to handle testing a circuit.
+ * <p>
+ * Through this class, the user is able to edit the nodes they want
+ * to track in the test, test their circuit and print the circuit's
+ * transition or truth table.
+ * 
+ * @author Joel Tengco
+ */
 public class CircuitTester {
+    /**
+     * Circuit engine to interface with the circuit.
+     */
     private CSEngine engine;
+    /**
+     * Holds the name of the current circuit being tested.
+     */
     private String circuitName;
+    /**
+     * Source of input from the user.
+     */
     private Scanner inputSource;
 
+    /**
+     * Constructs a new circuit tester that corresponds to the given circuit
+     * engine and input source.
+     * 
+     * @param engine the engine to provide the interface with the circuit
+     * @param inputSource the source of input from the user
+     */
     public CircuitTester(CSEngine engine, Scanner inputSource) {
         this.engine = engine;
         this.inputSource = inputSource;
     }
 
+    /**
+     * Entry point to start testing the circuit.
+     * <p>
+     * The circuit to be tested will be the circuit that the engine currently corresponds to.
+     * Note that the parameter is simply a means to print the circuit name in headers in the
+     * menus, it does not imply which circuit is being tested; the engine that was referenced
+     * when constructing this tester handles that.
+     * <p>
+     * This method will return once the user opts to do so in the menu printed directly from this
+     * method.
+     * <p>
+     * Recall that transition tables pertain to sequential circuits and truth tables pertain to
+     * combinational circuits. The proper option will be provided to the user depending on their
+     * circuit.
+     * 
+     * @param circuitName the name of the circuit being tested
+     */
     public void test(String circuitName) {
         this.circuitName = circuitName;
 
@@ -54,6 +96,13 @@ public class CircuitTester {
         } while(true);
     }
 
+    /**
+     * Edits the nodes being tracked in the circuit.
+     * <p>
+     * At this point, the user is able to track and untrack nodes
+     * as well as track and untrack all nodes. Only nodes that
+     * are being tracked will appear in the test.
+     */
     private void editTrackedNodes() {
         int userInput;
         String[] trackedNodes;
@@ -95,6 +144,13 @@ public class CircuitTester {
         } while(true);
     }
 
+    /**
+     * Tracks a node in the circuit.
+     * <p>
+     * If nodes exist in the circuit, then the user is able to choose
+     * which node to track. Otherwise, a message mentioning that there
+     * are no nodes in the circuit is printed.
+     */
     private void trackNode() {
         String prompt = "Enter the number of the node to track: ";
         int nodeIndex;
@@ -129,6 +185,13 @@ public class CircuitTester {
         }
     }
 
+    /**
+     * Untracks a node in the circuit.
+     * <p>
+     * If some nodes are being tracked in the circuit, then the user
+     * is able to choose which node to untrack. Otherwise, a message
+     * mentioning that there are no tracked nodes is printed.
+     */
     private void untrackNode() {
         String prompt = "Enter the number of the node to untrack: ";
         int nodeIndex;
@@ -163,6 +226,14 @@ public class CircuitTester {
         }
     }
 
+    /**
+     * Prints the test results of the circuit.
+     * <p>
+     * Proper error messages are given when the current circuit cannot be
+     * properly tested; either there are no input sequences, no tracked nodes
+     * or the circuit is in an invalid state. Otherwise, the test results are
+     * printed and the user is prompted to hit ENTER to return.
+     */
     private void printCircuitTest() {
         String[] trackedNodeNames;
         int[] trackedNodeValues;
@@ -221,16 +292,22 @@ public class CircuitTester {
         inputSource.nextLine();
     }
 
+    /**
+     * Prints the transition table of the circuit.
+     * <p>
+     * Assuming the circuit is sequential, the transition table
+     * is printed and then the user is prompted to hit ENTER to return.
+     */
     private void printTransitionTable() {
         ArrayList<ArrayList<String>> data;
         String[] flipFlopNodeNames;
         String[] outputNodeNames;
         String[] inputNodeNames;
-        String[] inputNodeCombs; // store the combinations of the input variable values
-        String temp = ""; // will store the header for input variable combinations
-        int fieldWidth1; // field width of PS
-        int fieldWidth2; // field width of NS
-        int nextStateSecLength; // stores how wide the next state section is in the table
+        String[] inputNodeCombs;    // store the combinations of the input variable values
+        String temp = "";           // will store the header for input variable combinations
+        int fieldWidth1;            // field width of PS
+        int fieldWidth2;            // field width of NS
+        int nextStateSecLength;     // stores how wide the next state section is in the table
 
         try {
             data = engine.getTransitionTableData();
@@ -305,7 +382,22 @@ public class CircuitTester {
         inputSource.nextLine();
     }
 
+    /**
+     * Utility method to get a binary number sequence with the specified
+     * number of bits.
+     * <p>
+     * For example, if 2 bits are given as an argument, then the string array
+     * returned will contain the elements: "00", "01", "10", "11".
+     * <p>
+     * The number of bits need to be positive, otherwise null is returned.
+     * 
+     * @param bits the number of bits to specify the range of the sequence
+     * @return string array containing the binary number sequence
+     */
     private String[] getBinaryNumSeq(int bits) {
+        if(bits <= 0)
+            return null;
+
         String[] result = new String[(int)Math.pow(2.0, bits)];
         LinkedList<String> queue = new LinkedList<String>();
         for(int i = 0; i < bits; i++)
@@ -332,6 +424,12 @@ public class CircuitTester {
         return result;
     }
 
+    /**
+     * Prints the truth table of the circuit.
+     * <p>
+     * Assuming the circuit is combinational, the truth table is then
+     * printed and the user is prompted to hit ENTER to return.
+     */
     private void printTruthTable() {
         ArrayList<ArrayList<Integer>> truthTableData;
         String[] inputNodeNames;

@@ -37,7 +37,7 @@ public class CircuitEditor {
      * Constructs a new circuit editor corresponding to the given engine along with the
      * specified source for user input.
      * 
-     * @param engine the engine for this editor to interface with the circuit with
+     * @param engine the engine to provide the interface to the circuit
      * @param inputSource the source to retrieve user input
      */
     public CircuitEditor(CSEngine engine, Scanner inputSource) {
