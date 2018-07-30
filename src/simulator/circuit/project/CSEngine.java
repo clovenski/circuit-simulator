@@ -825,7 +825,6 @@ public class CSEngine {
             }
     }
 
-    // nodeIndex refers to node's index in trackedNodes ArrayList
     /**
      * Untracks a node in the circuit.
      * <p>
@@ -887,6 +886,11 @@ public class CSEngine {
         return longestLength;
     }
 
+    /**
+     * Gets the length of the longest name in the circuit.
+     * 
+     * @return length of the longest name between all nodes
+     */
     public int getLongestNameLength() {
         int longestNameLength = 0;
         int compareLength;
@@ -902,6 +906,11 @@ public class CSEngine {
         return longestNameLength;
     }
 
+    /**
+     * Gets the length of the longest name between the tracked nodes.
+     * 
+     * @return length of the longest name between all tracked nodes
+     */
     public int getLongestTrackedNameLength() {
         int longestNameLength = 0;
         int compareLength;
@@ -917,7 +926,18 @@ public class CSEngine {
         return longestNameLength;
     }
 
-    public int[] getCurrentCircuitState() throws IllegalCircuitStateException {
+    /**
+     * Gets the current state of the circuit.
+     * <p>
+     * The current state of the circuit corresponds to the current
+     * values of all of its nodes.
+     * <p>
+     * The first element of the array will contain the value of the first node
+     * in the circuit, and so on.
+     * 
+     * @return array containing the values of all the nodes
+     */
+    public int[] getCurrentCircuitState() {
         int[] nodeValues = new int[trackedNodes.size()];
 
         for(int i = 0; i < trackedNodes.size(); i++)
@@ -926,6 +946,21 @@ public class CSEngine {
         return nodeValues;
     }
 
+    /**
+     * Updates the circuit and gets the resulting state of the circuit.
+     * <p>
+     * Updating the circuit consists of updating each node in the circuit
+     * in an order that simulates a working circuit. The resulting values
+     * of all the nodes in the circuit are then recorded in the array to
+     * be returned.
+     * <p>
+     * The first element of the array will contain the value of the first node
+     * in the circuit, and so on.
+     * 
+     * @return array containing the values of all the nodes
+     * @throws IllegalCircuitStateException if the circuit could not be updated
+     * due to it being in an invalid state
+     */
     public int[] getNextCircuitState() throws IllegalCircuitStateException {
         int[] nodeValues = new int[trackedNodes.size()];
 
@@ -938,6 +973,11 @@ public class CSEngine {
 
     }
 
+    /**
+     * Updates the circuit.
+     * 
+     * @throws IllegalCircuitStateException if the circuit is in an invalid state
+     */
     private void updateCircuit() throws IllegalCircuitStateException {
         String updatePath = "";
 
@@ -949,14 +989,34 @@ public class CSEngine {
             circuit.getNode(Integer.valueOf(tokenizer.nextToken())).updateValue();
     }
 
+    /**
+     * Resets the circuit.
+     * <p>
+     * Each node will have a value of 0.
+     */
     public void resetCircuit() {
         circuit.reset();
     }
 
+    /**
+     * Returns whether or not the circuit is sequential.
+     * <p>
+     * A circuit is sequential if and only if it contains at least
+     * one flip-flop.
+     * 
+     * @return true if the circuit contains a flip-flop, false otherwise
+     */
     public boolean isCircuitSequential() {
         return circuit.isSequential();
     }
 
+    /**
+     * Returns whether the circuit is currently in a valid state.
+     * <p>
+     * In other words, true will be returned if the circuit is able
+     * to be updated.
+     * @return true if the circuit is in a valid state
+     */
     public boolean isCircuitValid() {
         try {
             circuit.getUpdatePath();
@@ -967,9 +1027,26 @@ public class CSEngine {
         return true;
     }
 
+    /**
+     * Gets the data of the circuit's truth table.
+     * <p>
+     * This method applies only to circuits that are not sequential. For
+     * sequential circuits, refer to {@linkplain #getTransitionTableData()}.
+     * <p>
+     * The integer 2D array returned is formatted as:
+     * <p>
+     * rows = 2^n where n is number of input variables,<br>
+     * columns = number of input variables + number of output variables<br>
+     * 
+     * @return an integer 2D array containing the data of the truth table
+     * @throws IllegalStateException if the circuit is sequential, or input
+     * variable nodes do not exist, or output variable nodes do not exist
+     * @throws IllegalCircuitStateException if the circuit could not be updated
+     * due to it being in an invalid state
+     */
     public ArrayList<ArrayList<Integer>> getTruthTableData() throws IllegalStateException, IllegalCircuitStateException {
-        // int double array formatted as:   rows = 2^n where n is number of input variables,
-        //                                  cols = number of input variables + number of output variables
+        // int 2D array formatted as:   rows = 2^n where n is number of input variables,
+        //                              cols = number of input variables + number of output variables
 
         if(circuit.isSequential())
             throw new IllegalStateException("This circuit is a sequential circuit, it does not have a truth table");
@@ -1026,9 +1103,9 @@ public class CSEngine {
             inputVariables.get(j).setInputSeq(Arrays.copyOf(tempSequence, tempSequence.length));
         }
 
-        // fill output variables section in array; for each input variable combination, store the values in the output variables
         circuit.reset();
 
+        // fill output variables section in array; for each input variable combination, store the values in the output variables
         int startColumn = inputVariables.size();
         for(int i = 0; i < rowSize; i++) {
             updateCircuit();
@@ -1055,12 +1132,33 @@ public class CSEngine {
         return result;
     }
 
+    /**
+     * Gets the data of the circuit's transition table.
+     * <p>
+     * This method applies only to circuits that are sequential. For
+     * non-sequential circuits, refer to {@linkplain #getTruthTableData()}.
+     * <p>
+     * The string 2D array returned is formatted as:
+     * <p>
+     * rows = 2^n where n is number of D flip flops,<br>
+     * cols = 1 + 2^m where m is number of input variables<br>
+     * first column represents present state combination<br>
+     * every column after first as: [FF..F, ZZ..Z] such that each F for a D
+     * flip-flop, each Z for an output variable, both being either 0 or 1,
+     * representing their next states<br>
+     * 
+     * @return a string 2D array containing the data of the transition table
+     * @throws IllegalStateException if the circuit is not sequential or input
+     * variable nodes do not exist
+     * @throws IllegalCircuitStateException if the circuit could not be updated
+     * due to it being in an invalid state
+     */
     public ArrayList<ArrayList<String>> getTransitionTableData() throws IllegalStateException, IllegalCircuitStateException {
         // double array formatted as:   rows = 2^n where n is number of D flip flops,
         //                              cols = 1 + 2^m where m is number of input variables
         // first column represents present state combination;
         // for every column after that:
-        //      each string formatted as: [FF...F, ZZ..Z]   such that each F for a D flip flop, each Z for an output variable,
+        //      each string formatted as: [FF..F, ZZ..Z]   such that each F for a D flip-flop, each Z for an output variable,
         //                                                  both being either 0 or 1, representing their next states
 
         if(!circuit.isSequential())
@@ -1180,6 +1278,11 @@ public class CSEngine {
         return result;
     }
 
+    /**
+     * Gets the names of all the nodes in the circuit.
+     * 
+     * @return an array containing the names of all the nodes
+     */
     public String[] getCircuitNodeNames() {
         String[] result = new String[circuit.getSize()];
         for(int i = 0; i < circuit.getSize(); i++)
@@ -1188,6 +1291,11 @@ public class CSEngine {
         return result;
     }
 
+    /**
+     * Gets the node types of all the nodes in the circuit.
+     * 
+     * @return an array containing the node types of all the nodes
+     */
     public String[] getCircuitNodeTypes() {
         String[] result = new String[circuit.getSize()];
         for(int i = 0; i < circuit.getSize(); i++)
@@ -1196,6 +1304,11 @@ public class CSEngine {
         return result;
     }
 
+    /**
+     * Gets the names of all the input variable nodes in the circuit.
+     * 
+     * @return an array containing the names of all the input variable nodes
+     */
     public String[] getInputNodeNames() {
         String[] result = new String[inputNodeNames.size()];
 
@@ -1205,6 +1318,11 @@ public class CSEngine {
         return result;
     }
 
+    /**
+     * Gets the names of all the output variable nodes in the circuit.
+     * 
+     * @return an array containing the names of all the output variable nodes
+     */
     public String[] getOutputNodeNames() {
         String[] result = new String[outputNodeNames.size()];
 
@@ -1214,6 +1332,11 @@ public class CSEngine {
         return result;
     }
 
+    /**
+     * Gets the names of all the flip-flops in the circuit.
+     * 
+     * @return an array containing the names of all the flip-flops
+     */
     public String[] getFlipFlopNodeNames() {
         String[] result = new String[flipFlopNodeNames.size()];
 
@@ -1223,10 +1346,31 @@ public class CSEngine {
         return result;
     }
 
+    /**
+     * Gets the size of the circuit.
+     * 
+     * @return the number of nodes in the circuit
+     */
     public int getCircuitSize() {
         return circuit.getSize();
     }
 
+    /**
+     * Gets general information about the circuit.
+     * <p>
+     * The format of the integer array to be returned (from first element to last):
+     * <ol>
+     *   <li>Number of input variable nodes</li>
+     *   <li>Number of input sequences</li>
+     *   <li>Number of output variable nodes</li>
+     *   <li>Number of flip-flops</li>
+     *   <li>Number of gates</li>
+     *   <li>Number of inverters</li>
+     *   <li>Number of connections</li>
+     * </ol>
+     * 
+     * @return an array containing information about the circuit
+     */
     public int[] getCircuitStatus() {
         int[] status = new int[7];
         CSNode node;
@@ -1271,6 +1415,19 @@ public class CSEngine {
         return status;
     }
 
+    /**
+     * Gets the connection status of the circuit.
+     * <p>
+     * First element in the string array to be returned corresponds
+     * to the first node in the circuit, and so on.
+     * <p>
+     * Each string in the array is formatted as (for example, first node):
+     * "  1 -&gt; [2, 4]" (first node has connection to second and fourth node)<br>
+     * Note the 3-character wide field to hold the node number.<br>
+     * Output variable nodes will instead have " -&gt; [output]"<br>
+     * 
+     * @return array containing the connection status for each node
+     */
     public String[] getCircuitConnectionStatus() {
         String[] result = new String[circuit.getSize()];
         String adjListString;
@@ -1296,6 +1453,20 @@ public class CSEngine {
         return result;
     }
 
+    /**
+     * Gets the status of the circuit's input sequences.
+     * <p>
+     * Format of each string in the array:
+     * <p>
+     * "1. name            [1, 0, 0, 1]"<br>
+     * Note the 15-character wide field to hold the input variable
+     * name.<br>
+     * This field width is actually the maximum between 15 and the
+     * longest input variable node name.<br>
+     * Empty input sequences will simply have "[]".<br>
+     * 
+     * @return array containing the input sequence statuses
+     */
     public String[] getCircuitInputSeqStatus() {
         String[] result = new String[inputNodeNames.size()];
         String inputNodeName;
@@ -1323,21 +1494,34 @@ public class CSEngine {
         return result;
     }
 
-    public void saveCircuit(String fileName) throws FileNotFoundException, IOException, ClassNotFoundException {
+    /**
+     * Saves the current circuit as a file.
+     * 
+     * @param fileName the name of the save file
+     * @throws FileNotFoundException if something went wrong in setting up saving the circuit
+     * @throws IOException if an error occurred when attempting to save the circuit
+     */
+    public void saveCircuit(String fileName) throws FileNotFoundException, IOException {
         CSFileIO.writeSaveFile(circuit, fileName);
     }
 
+    /**
+     * Loads a circuit from a file.
+     * 
+     * @param fileName the name of the file
+     * @throws FileNotFoundException if something went wrong in locating the file
+     * @throws IOException if an error occurred when attemping to read the file
+     * @throws ClassNotFoundException if a circuit could not be read from the file
+     * @throws ClassCastException if the object read from the file is not a circuit
+     */
     public void loadCircuit(String fileName) throws FileNotFoundException, IOException, ClassNotFoundException, ClassCastException {
         CSNode node;
         Inverter inverterNode;
 
         circuit = CSFileIO.readSaveFile(fileName);
 
-        inputNodeNames.clear();
-        outputNodeNames.clear();
-        flipFlopNodeNames.clear();
-        invertedNodes.clear();
-        trackedNodes.clear();
+        // clear the list fields of their contents
+        clearArrayLists();
 
         for(int i = 0; i < circuit.getSize(); i++) {
             node = circuit.getNode(i);
@@ -1360,8 +1544,19 @@ public class CSEngine {
         trackedNodes.sort(new CSNodeTrackNumComparator());
     }
 
+    /**
+     * Creates a new circuit for this engine to work on.
+     */
     public void newCircuit() {
         circuit = new CSGraph();
+        // clear the list fields of their contents
+        clearArrayLists();
+    }
+
+    /**
+     * Utility method for loading a circuit and creating a new circuit.
+     */
+    private void clearArrayLists() {
         inputNodeNames.clear();
         outputNodeNames.clear();
         flipFlopNodeNames.clear();
