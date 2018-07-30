@@ -92,6 +92,8 @@ public abstract class CSNode implements Serializable {
 
     /**
      * Sets this node's track number.
+     * <p>
+     * The track number is not changed for non-positive integers given.
      * 
      * @param trackNum positive integer representing this node's new track number
      */

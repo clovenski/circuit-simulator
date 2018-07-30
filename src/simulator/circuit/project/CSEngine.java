@@ -383,6 +383,17 @@ public class CSEngine {
         circuit.addEdge(sourceIndex, targetIndex);
     }
 
+    /**
+     * Removes a node from the circuit.
+     * <p>
+     * Flip-flop output nodes cannot be removed using this method.
+     * If the node to be removed has an inverter, that inverter is
+     * also removed.
+     * 
+     * @param nodeID the ID/name of the node to be removed
+     * @throws IllegalArgumentException if the node does not exist or a flip-flop
+     * output node was specified
+     */
     public void removeNode(String nodeID) throws IllegalArgumentException {
         int nodeIndex = circuit.indexOf(nodeID);
 
@@ -395,6 +406,8 @@ public class CSEngine {
             throw new IllegalArgumentException("Output nodes for flip flops cannot be removed, try to remove the flip flop itself instead");
         else if(node instanceof FlipFlop) {
             flipFlopNodeNames.remove(node.getName());
+            // if more flip-flops become supported, implement switch-case
+            // here to choose what kind of flip-flop is being removed
             removeDFFNode(nodeIndex);
             return;
         } else if(node instanceof Inverter) {
@@ -431,6 +444,14 @@ public class CSEngine {
         }
     }
 
+    /**
+     * Utility method for removing a D flip-flop from the circuit.
+     * <p>
+     * This method will remove both the {@code DFlipFlop} object and its
+     * corresponding {@code FFOutNode} objects.
+     * 
+     * @param nodeIndex the index of the D flip-flop node to remove; indeces start from zero
+     */
     private void removeDFFNode(int nodeIndex) {
         CSNode neighborNode;
         VariableInput varInputNode;
@@ -478,6 +499,13 @@ public class CSEngine {
         }
     }
 
+    /**
+     * Utility method for removing an inverter from the circuit.
+     * 
+     * @param inverterIndex the index of the inverter to remove; indeces start from zero
+     * @param indecesToRemove reference to a list that, after this method's execution, will
+     * contain the indeces of the nodes to be removed
+     */
     private void removeInverter(int inverterIndex, ArrayList<Integer> indecesToRemove) {
         CSNode neighborNode;
         VariableInput varInputNode;
@@ -498,6 +526,20 @@ public class CSEngine {
         }
     }
 
+    /**
+     * Renames a node in the circuit.
+     * <p>
+     * The given new name cannot already exist in the circuit. The node to
+     * be renamed cannot be a flip-flop output node or an inverter. If the
+     * node to be renamed has an inverter or output node (for flip-flops),
+     * then they will be renamed as well.
+     * 
+     * @param nodeIndex the index of the node to be renamed; indeces start from zero
+     * @param newName the new name of the node
+     * @throws IllegalArgumentException if the new name already exists, or the given index is
+     * out of bounds, or the node to be renamed is either a flip-flop output node or an
+     * inverter
+     */
     public void renameNode(int nodeIndex, String newName) throws IllegalArgumentException {
         CSNode targetNode;
         String targetNodeName;
@@ -592,6 +634,24 @@ public class CSEngine {
         }
     }
 
+    /**
+     * Removes a connection from this circuit.
+     * <p>
+     * The indeces start from zero, so use index 0 for the first node in
+     * the circuit, and so on.
+     * <p>
+     * The connection between a {@code FlipFlop} object and its corresponding
+     * {@code FFOutNode} objects cannot be removed.
+     * <p>
+     * The exceptions pertaining to indeces will contain a message regarding the
+     * node number. For instance, if the given index is 3 and is invalid, then the
+     * exception will contain the message "4 is an invalid index".
+     * 
+     * @param sourceIndex the index of the source node of the connection
+     * @param targetIndex the index of the target node of the connection
+     * @throws IllegalArgumentException if the specified connection does not exist, or
+     * any of the indeces are out of bounds, or the source node is a flip-flop
+     */
     public void removeConnection(int sourceIndex, int targetIndex) throws IllegalArgumentException {
         CSNode sourceNode;
         CSNode targetNode;
@@ -634,6 +694,18 @@ public class CSEngine {
         }
     }
 
+    /**
+     * Removes a connection from this circuit.
+     * <p>
+     * The connection between a {@code FlipFlop} object and its corresponding
+     * {@code FFOutNode} objects cannot be removed.
+     * 
+     * @param sourceName the name of the source node of the connection
+     * @param targetName the name of the target node of the connection
+     * @throws IllegalArgumentException if either of the two nodes does not
+     * exist in the circuit, the connection does not exist, or the source node
+     * is a flip-flop
+     */
     public void removeConnection(String sourceName, String targetName) throws IllegalArgumentException {
         CSNode sourceNode;
         CSNode targetNode;
@@ -648,18 +720,10 @@ public class CSEngine {
 
         if(!(circuit.containsEdge(sourceIndex, targetIndex)))
             throw new IllegalArgumentException("The specified connection does not exist");
-
-        try {
-            sourceNode = circuit.getNode(sourceIndex);
-        } catch(IndexOutOfBoundsException ioobe) {
-            throw new IllegalArgumentException((sourceIndex + 1) + " is an invalid index");
-        }
-
-        try {
-            targetNode = circuit.getNode(targetIndex);
-        } catch(IndexOutOfBoundsException ioobe) {
-            throw new IllegalArgumentException((targetIndex + 1) + " is an invalid index");
-        }
+        
+        // source and target indeces are valid at this point
+        sourceNode = circuit.getNode(sourceIndex);
+        targetNode = circuit.getNode(targetIndex);
 
         if(sourceNode instanceof FlipFlop)
             throw new IllegalArgumentException("Flip flops cannot exist without their output nodes");
@@ -684,6 +748,12 @@ public class CSEngine {
         }
     }
 
+    /**
+     * Sets an input sequence to a specified input variable node in the circuit.
+     * 
+     * @param inputNodeID the ID/name of the input varaible node
+     * @param newSeq the new sequence to be set
+     */
     public void setInputSeq(String inputNodeID, int[] newSeq) {
         int nodeIndex = circuit.indexOf(inputNodeID);
         InputVariableNode node = (InputVariableNode)circuit.getNode(nodeIndex);
@@ -691,6 +761,11 @@ public class CSEngine {
         node.setInputSeq(newSeq);
     }
 
+    /**
+     * Gets the names of the nodes currently being tracked.
+     * 
+     * @return an array containing the names of the tracked nodes
+     */
     public String[] getTrackedNodeNames() {
         String[] nodeNames = new String[trackedNodes.size()];
 
@@ -700,6 +775,18 @@ public class CSEngine {
         return nodeNames;
     }
 
+    /**
+     * Tracks a node in the circuit.
+     * <p>
+     * If the index given is 3 and is invalid, then an exception
+     * is thrown with the message "4 is an invalid index".
+     * An exception is also thrown when the specified node is
+     * already being tracked.
+     * 
+     * @param nodeIndex the index of the node to be tracked; indeces start from zero
+     * @throws IllegalArgumentException if the index is out of bounds or the node
+     * is already being tracked
+     */
     public void trackNode(int nodeIndex) throws IllegalArgumentException {
         CSNode node;
 
@@ -715,6 +802,13 @@ public class CSEngine {
             
     }
 
+    /**
+     * Tracks all the nodes in the circuit.
+     * <p>
+     * Nodes already being tracked will retain their track numbers.
+     * The untracked nodes become tracked in order from first node
+     * to last node in the circuit.
+     */
     public void trackAllNodes() {
         // number of nodes that are untracked
         int untrackedNodes = circuit.getSize() - trackedNodes.size();
@@ -732,6 +826,21 @@ public class CSEngine {
     }
 
     // nodeIndex refers to node's index in trackedNodes ArrayList
+    /**
+     * Untracks a node in the circuit.
+     * <p>
+     * The parameter refers to the tracked node's index in the list
+     * of tracked nodes, not the index in the circuit. So out of bounds
+     * would be a negative integer or an integer greater than or equal to
+     * the number of nodes currently being tracked.
+     * <p>
+     * To be clear, pass the integer 0 as an argument to untrack the node
+     * whose track number is 1; and so on.
+     * 
+     * @param nodeIndex the index of the tracked node in the list of tracked
+     * nodes; indeces start from zero
+     * @throws IllegalArgumentException if the index is out of bounds
+     */
     public void untrackNode(int nodeIndex) throws IllegalArgumentException {
         if(nodeIndex < 0 || nodeIndex >= trackedNodes.size())
             throw new IllegalArgumentException((nodeIndex + 1) + " is an invalid index");
@@ -747,6 +856,9 @@ public class CSEngine {
         trackedNodes.remove(nodeIndex);
     }
 
+    /**
+     * Untracks all nodes that are currently being tracked.
+     */
     public void untrackAllNodes() {
         for(CSNode node : trackedNodes)
             node.resetTrackNum();
@@ -754,6 +866,12 @@ public class CSEngine {
         trackedNodes.clear();
     }
 
+    /**
+     * Gets the length of the longest input sequence in the circuit.
+     * 
+     * @return zero if there are no input sequences, otherwise the maximum
+     * between all input sequence lengths
+     */
     public int getLongestInputSeqLength() {
         int longestLength = 0;
         int compareLength;
