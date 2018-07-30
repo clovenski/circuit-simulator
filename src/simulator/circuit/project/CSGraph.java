@@ -41,7 +41,7 @@ public class CSGraph implements Serializable {
      * allowed.
      * 
      * @param newNode the node to be added to this circuit
-     * @throws IllegalArgumentException if a duplicate node is to be added
+     * @throws IllegalArgumentException if a node with the same name already exists in the circuit
      */
     public void addNode(CSNode newNode) throws IllegalArgumentException {
         String newNodeName = newNode.getName();

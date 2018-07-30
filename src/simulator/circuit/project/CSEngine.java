@@ -10,35 +10,69 @@ import java.util.StringTokenizer;
 
 import simulator.circuit.project.CSGraph.IllegalCircuitStateException;
 
+/**
+ * Class to provide the interface to a circuit.
+ * <p>
+ * This class handles building the circuit, updating the circuit,
+ * obtaining necessary information about the circuit, saving the circuit,
+ * loading another circuit and creating a new circuit to work on. All the
+ * work to be done on a circuit is done through this class.
+ * 
+ * @author Joel Tengco
+ */
 public class CSEngine {
+    /**
+     * Circuit that will be worked on.
+     */
     private CSGraph circuit;
+    /**
+     * Contains the names of the circuit's input variable nodes.
+     */
     private ArrayList<String> inputNodeNames;
+    /**
+     * Contains the names of the circuit's output variable nodes.
+     */
     private ArrayList<String> outputNodeNames;
+    /**
+     * Contains the names of the circuit's flip-flop nodes.
+     */
     private ArrayList<String> flipFlopNodeNames;
+    /**
+     * Contains the names of the nodes that currently have a corresponding
+     * {@code Inverter} object.
+     */
     private ArrayList<String> invertedNodes;
+    /**
+     * Contains references to the nodes that are currently being tracked.
+     * The references in this list are ordered as in the first element in
+     * the list being the node with a track number of 1, and so on.
+     */
     private ArrayList<CSNode> trackedNodes;
 
+    /**
+     * Constructs a new engine with a new, empty circuit to work on.
+     */
     public CSEngine() {
         circuit = new CSGraph();
-        inputNodeNames = new ArrayList<String>();
-        outputNodeNames = new ArrayList<String>();
-        flipFlopNodeNames = new ArrayList<String>();
-        invertedNodes = new ArrayList<String>();
-        trackedNodes = new ArrayList<CSNode>();
+        // initialize array list fields
+        initArrayLists();
     }
 
+    /**
+     * Constructs a new engine with the given circuit to work on.
+     * 
+     * @param circuit the circuit that the engine will correspond to
+     */
     public CSEngine(CSGraph circuit) {
         CSNode node;
         Inverter inverterNode;
 
         this.circuit = circuit;
 
-        inputNodeNames = new ArrayList<String>();
-        outputNodeNames = new ArrayList<String>();
-        flipFlopNodeNames = new ArrayList<String>();
-        invertedNodes = new ArrayList<String>();
-        trackedNodes = new ArrayList<CSNode>();
+        // initialize array list fields
+        initArrayLists();
 
+        // fill the fields with appropriate data
         for(int i = 0; i < circuit.getSize(); i++) {
             node = circuit.getNode(i);
 
@@ -57,19 +91,63 @@ public class CSEngine {
                 trackedNodes.add(node);
         }
 
+        // sort the trackedNodes list because nodes are not necessarily
+        // ordered by their track number
         trackedNodes.sort(new CSNodeTrackNumComparator());
     }
 
+    /**
+     * Utility method for constructors to initialize the array list fields.
+     */
+    private void initArrayLists() {
+        inputNodeNames = new ArrayList<String>();
+        outputNodeNames = new ArrayList<String>();
+        flipFlopNodeNames = new ArrayList<String>();
+        invertedNodes = new ArrayList<String>();
+        trackedNodes = new ArrayList<CSNode>();
+    }
+
+    /**
+     * Adds an input variable node to the circuit.
+     * 
+     * @param nodeID the ID/name of the input variable node to be added
+     * @throws IllegalArgumentException if another node with the given ID/name
+     * already exists in the circuit
+     */
     public void addInputNode(String nodeID) throws IllegalArgumentException {
         circuit.addNode(new InputVariableNode(nodeID));
         inputNodeNames.add(nodeID);
     }
 
+    /**
+     * Adds an output variable node to the circuit.
+     * 
+     * @param nodeID the ID/name of the output variable node to be added
+     * @throws IllegalArgumentException if another node with the given ID/name
+     * already exists in the circuit
+     */
     public void addOutputNode(String nodeID) throws IllegalArgumentException {
         circuit.addNode(new OutputVariableNode(nodeID));
         outputNodeNames.add(nodeID);
     }
-    
+
+    /**
+     * Adds a D flip-flop entity to the circuit.
+     * <p>
+     * D flip-flop entities consist of three nodes in the circuit. One node
+     * is the D flip-flop's next state, while the other two are its output
+     * nodes. The next state node is added to the circuit first, then the
+     * normal, non-negated output node is added and finally the negated
+     * output node is added.
+     * <p>
+     * The names of the output nodes will be the given node ID concatenated with
+     * "-out" for the non-negated output node and "-outneg" for the negated output
+     * node.
+     * 
+     * @param nodeID the name of the D flip-flop to be added
+     * @throws IllegalArgumentException if a node with the given ID/name already
+     * exists in the circuit
+     */
     public void addDFFNode(String nodeID) throws IllegalArgumentException {
         DFlipFlop newDFFNode = new DFlipFlop(nodeID);
         FFOutNode newDFFNodeOut = new FFOutNode(nodeID + "-out", newDFFNode);
@@ -86,30 +164,93 @@ public class CSEngine {
         circuit.addEdge(circuit.getSize() - 3, circuit.getSize() - 1);
     }
 
+    /**
+     * Adds an AND gate to the circuit.
+     * 
+     * @param nodeID the ID/name of the AND gate to be added
+     * @throws IllegalArgumentException if a node with the given ID/name already
+     * exists in the circuit
+     */
     public void addAndGate(String nodeID) throws IllegalArgumentException {
         circuit.addNode(new AndGate(nodeID));
     }
 
+    /**
+     * Adds a NAND gate to the circuit.
+     * 
+     * @param nodeID the ID/name of the NAND gate to be added
+     * @throws IllegalArgumentException if a node with the given ID/name already
+     * exists in the circuit
+     */
     public void addNandGate(String nodeID) throws IllegalArgumentException {
         circuit.addNode(new NandGate(nodeID));
     }
 
+    /**
+     * Adds an OR gate to the circuit.
+     * 
+     * @param nodeID the ID/name of the OR gate to be added
+     * @throws IllegalArgumentException if a node with the given ID/name already
+     * exists in the circuit
+     */
     public void addOrGate(String nodeID) throws IllegalArgumentException {
         circuit.addNode(new OrGate(nodeID));
     }
 
+    /**
+     * Adds a NOR gate to the circuit.
+     * 
+     * @param nodeID the ID/name of the NOR gate to be added
+     * @throws IllegalArgumentException if a node with the given ID/name already
+     * exists in the circuit
+     */
     public void addNorGate(String nodeID) throws IllegalArgumentException {
         circuit.addNode(new NorGate(nodeID));
     }
 
+    /**
+     * Adds an XOR gate to the circuit.
+     * 
+     * @param nodeID the ID/name of the XOR gate to be added
+     * @throws IllegalArgumentException if a node with the given ID/name already
+     * exists in the circuit
+     */
     public void addXorGate(String nodeID) throws IllegalArgumentException {
         circuit.addNode(new XorGate(nodeID));
     }
 
+    /**
+     * Adds an NXOR gate to the circuit.
+     * 
+     * @param nodeID the ID/name of the NXOR gate to be added
+     * @throws IllegalArgumentException if a node with the given ID/name already
+     * exists in the circuit
+     */
     public void addNXorGate(String nodeID) throws IllegalArgumentException {
         circuit.addNode(new NXorGate(nodeID));
     }
 
+    /**
+     * Adds an inverter to the circuit.
+     * <p>
+     * An inverter cannot exist in the circuit without its source node.
+     * Thus, the node it is going to invert must exist in the circuit
+     * before adding its inverter. Flip-flops cannot be inverted since
+     * by default they already have their own inverted output. Also,
+     * output variable nodes cannot be inverted.
+     * <p>
+     * The inverter node's name will be the given source node ID concatenated with
+     * "-inverter".
+     * <p>
+     * Note that although seemingly redundant, inverters themselves can have its own
+     * inverter. The condition of the source node's existence still applies, so the
+     * removal of the first inverter will result in the removal of its own inverter.
+     * 
+     * @param sourceNodeID the ID/name of the node that the inverter will correspond to
+     * @throws IllegalArgumentException if the given source node ID does not exist in the
+     * circuit, or the source node is either a flip-flop or output variable node, or the
+     * inverter to be added to the circuit already exists (name duplicate)
+     */
     public void addInverter(String sourceNodeID) throws IllegalArgumentException {
         int sourceIndex = circuit.indexOf(sourceNodeID);
 
@@ -127,6 +268,28 @@ public class CSEngine {
         invertedNodes.add(sourceNodeID);
     }
 
+    /**
+     * Adds a connection in the circuit.
+     * <p>
+     * The indeces start from zero, so use index 0 for the first node in the
+     * circuit, and so on.
+     * <p>
+     * Nodes cannot have a connection to itself. In other words, the two parameters
+     * cannot be equal. The source node cannot be an output variable node or a flip-flop.
+     * The target node needs to implement the {@linkplain VariableInput} interface.
+     * <p>
+     * The exceptions pertaining to indeces will contain a message regarding the
+     * node number. For instance, if a connection from the first to second node
+     * already exists, then an exception with the message "1 to 2 connection already
+     * exists" will be thrown.
+     * 
+     * @param sourceIndex the index of the source node for the connection
+     * @param targetIndex the index of the target node for the connection
+     * @throws IllegalArgumentException if the two indeces are equal, or the specified
+     * connection already exists, or either of the indeces are out of bounds, or the
+     * source node is either an output variable node or a flip-flop, or the target
+     * node does not implement {@linkplain VariableInput}
+     */
     public void addConnection(int sourceIndex, int targetIndex) throws IllegalArgumentException {
         CSNode sourceNode;
         CSNode targetNode;
@@ -148,7 +311,7 @@ public class CSEngine {
             throw new IllegalArgumentException((targetIndex + 1) + " is an invalid index");
         }
 
-        if(sourceNode instanceof OutputVariableNode || sourceNode instanceof DFlipFlop)
+        if(sourceNode instanceof OutputVariableNode || sourceNode instanceof FlipFlop)
             throw new IllegalArgumentException(sourceNode.getName() + " cannot be a source of a connection");
         if(!(targetNode instanceof VariableInput))
             throw new IllegalArgumentException(targetNode.getName() + " cannot be a target of a connection");
@@ -166,6 +329,21 @@ public class CSEngine {
         circuit.addEdge(sourceIndex, targetIndex);
     }
 
+    /**
+     * Adds a connection in the circuit.
+     * <p>
+     * Nodes cannot have a connection to itself. In other words, the
+     * two parameters cannot be equal. The source node cannot be an output
+     * variable node or a flip-flop. The target node needs to implement the
+     * {@linkplain VariableInput} interface.
+     * 
+     * @param sourceName the name of the source node of the connection
+     * @param targetName the name of the target node of the connection
+     * @throws IllegalArgumentException if either of the two names do not exist in
+     * the circuit, or the two names are equal, or the connection already exists, or
+     * the source node is either an output variable node or a flip-flop, or the target
+     * node does not implement {@linkplain VariableInput}
+     */
     public void addConnection(String sourceName, String targetName) throws IllegalArgumentException {
         CSNode sourceNode;
         CSNode targetNode;
@@ -181,21 +359,13 @@ public class CSEngine {
         if(sourceIndex == targetIndex)
             throw new IllegalArgumentException("The specified connection is illegal");
         if(circuit.containsEdge(sourceIndex, targetIndex))
-            throw new IllegalArgumentException((sourceIndex + 1) + " to " + (targetIndex + 1) + " connection already exists");
+            throw new IllegalArgumentException("A connection from " + sourceName + " to " + targetName + " already exists");
+        
+        // source and target indeces are valid at this point
+        sourceNode = circuit.getNode(sourceIndex);
+        targetNode = circuit.getNode(targetIndex);
 
-        try {
-            sourceNode = circuit.getNode(sourceIndex);
-        } catch(IndexOutOfBoundsException ioobe) {
-            throw new IllegalArgumentException((sourceIndex + 1) + " is an invalid index");
-        }
-
-        try {
-            targetNode = circuit.getNode(targetIndex);
-        } catch(IndexOutOfBoundsException ioobe) {
-            throw new IllegalArgumentException((targetIndex + 1) + " is an invalid index");
-        }
-
-        if(sourceNode instanceof OutputVariableNode || sourceNode instanceof DFlipFlop)
+        if(sourceNode instanceof OutputVariableNode || sourceNode instanceof FlipFlop)
             throw new IllegalArgumentException(sourceNode.getName() + " cannot be a source of a connection");
         if(!(targetNode instanceof VariableInput))
             throw new IllegalArgumentException(targetNode.getName() + " cannot be a target of a connection");

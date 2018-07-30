@@ -391,7 +391,7 @@ public class CircuitEditor {
         int sourceNodeIndex;
         int targetNodeIndex;
         int circuitSize = engine.getCircuitSize();
-        if(circuitSize <= 1)
+        if(circuitSize < 2)
             throw new IllegalArgumentException("There are not enough nodes to add a connection");
 
         // if inputting connection data normally, by node name
